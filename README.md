@@ -33,3 +33,36 @@ An admin panel can be used to create a new *category*, *edit* or *delete* an exi
 *Managing* an *order* means that they can *cancel* one (issuing a refund), with a *reason*, *update* the current state of the *order*, *mark as shipped*.  
 
 An admin can *inspect* analytics about the platform. For each *product*, the price changes in a set interval of time, return rate, purchases trends, and more.
+
+
+## Running
+Get the server up and running for the first time:
+
+```
+docker-compose up --build
+```
+
+Move from terminal in the root of this project then run the following command:
+
+```
+docker compose --env-file .env.dev up -d
+docker compose exec web env
+```
+
+From this moment, you will be able to access `web` at port  `:8000`, `pgAdmin` at port `:5050`, `redis` cache at port `:6379`.
+
+To perform migrations:
+
+```
+docker compose exec web python manage.py migrate
+```
+
+## Inspect database
+
+To inspect the database content, connect to `localhost:5050` and register a new server with the following parameters:
+
+- Host name: `db` (or whatever is the registered service name in `docker.compose.yml`)
+- Port: `5432` (or the port specified under `db` in `docker.compose.yml`)
+- Maintenance database: `unifi_db` (or the value specified in `.env.dev` under `POSTGRES_DB`)
+- Username and Password: specified in `.env.dev` under `POSTGRES_USER` / `POSTGRES_PASSWORD`
+

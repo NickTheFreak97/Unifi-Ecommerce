@@ -7,6 +7,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 ROOT_URLCONF = "Unifi_Ecommerce.urls"
+AUTH_USER_MODEL = "users.User"
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "django_celery_results",
     "catalog.apps.CatalogConfig",
+    "users.apps.UsersConfig",
 ]
 
 DATABASES = {
