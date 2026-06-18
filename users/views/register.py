@@ -71,8 +71,8 @@ class RegisterStaffMember(APIView):
         created_user = __create_user__(request.data['email'], request.data['username'], request.data['password'])
 
         if isinstance(created_user, User):
-            customer_group = Group.objects.get(name=Role.staff)
-            created_user.groups.add(customer_group)
+            staff_group = Group.objects.get(name=Role.staff)
+            created_user.groups.add(staff_group)
 
             token_for_new_user = RefreshToken.for_user(created_user)
             return Response({
