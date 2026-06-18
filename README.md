@@ -16,7 +16,7 @@ In the scenario (1), when the user is not logged in, an anonymous identity is cr
 
 An *order* has a *cart*, a *billing address*, a *shipping address* (optionally matching the *billing* one), *shipping method*, *payment method* and an *identity* associated with it. An order also crosses multiple states. For example: pending → confirmed → shipped → delivered → cancelled. The user has two options.
 
-1. Complete the order (!! still can be cancelled later).
+1. Complete the order (!! still can be canceled later).
 2. Abandon the transaction.
 
 - In the scenario (1), the order has been paid and the payment confirmed. The user is presented with a confirmation screen. They see a unique order ID that they can use for reference in case they completed the order anonymously. and a recap of the order. The user possibly received an email confirmation with an invoice of the purchase. 
@@ -46,15 +46,20 @@ Move from terminal in the root of this project then run the following command:
 
 ```
 docker compose --env-file .env.dev up -d
-docker compose exec web env
 ```
 
 From this moment, you will be able to access `web` at port  `:8000`, `pgAdmin` at port `:5050`, `redis` cache at port `:6379`.
 
-To perform migrations:
+To perform migrations (must execute at least the first time after you compose):
 
 ```
 docker compose exec web python manage.py migrate
+```
+
+If hot reload seems broken for some service, you can try
+
+```
+docker compose build --no-cache <service_name>
 ```
 
 ## Inspect database

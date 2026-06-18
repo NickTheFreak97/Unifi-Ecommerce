@@ -2,11 +2,15 @@ from django.db.models import Q
 from django.contrib.auth.models import Group
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from users.models.user.user import User
 from users.models.user.roles import Role
 
 class RegisterCustomer(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get('email')
         username = request.data.get('username')
@@ -46,9 +50,11 @@ class RegisterCustomer(APIView):
                     customer_group = Group.objects.get(name=Role.customer)
                     created_user.groups.add(customer_group)
 
+                    token_for_new_user = RefreshToken.for_user(created_user)
                     return Response({
                         'success': 'created a new user',
-                        'id': created_user.id
+                        'id': created_user.id,
+                        'token': str(token_for_new_user)
                         },
                         status=status.HTTP_201_CREATED
                     )
