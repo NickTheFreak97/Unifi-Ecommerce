@@ -9,7 +9,7 @@ class CreateCategory(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        name = request.data['name']
+        name = request.data.get('name')
 
         if not name:
             return Response(

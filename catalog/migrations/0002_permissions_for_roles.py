@@ -3,8 +3,8 @@ from django.db import migrations
 from django.apps import apps as global_apps
 from django.contrib.auth.management import create_permissions
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Group, Permission
 from users.models.user.roles import Role
+from django.contrib.auth.models import Group, Permission
 from django.db import models
 
 from typing import Type, List
@@ -18,7 +18,7 @@ class GroupPermission:
         self.group = group
         self.permissions = permissions
 
-    def apply(self, model: Type[models.Model], content_type: ContentType):
+    def apply(self, model: Type[models.Model], content_type: ContentType, Group: Type[Group], Permission: Type[Permission]):
         group = Group.objects.get(name=self.group)
 
         permissions = list()
@@ -30,10 +30,10 @@ class GroupPermission:
             codename__in = permissions
         )
 
-        group.permissions.set(permissions_models)
+        group.permissions.add(*permissions_models)
 
 
-    def remove(self, model, content_type):
+    def remove(self, model, content_type, Group: Type[Group], Permission: Type[Permission]):
         group = Group.objects.get(name=self.group)
 
         permissions = list()
@@ -65,6 +65,7 @@ def create_groups_permissions(apps, schema_editor):
     product_attribute = apps.get_model("catalog", "ProductAttribute")
     categories = apps.get_model("catalog", "Category")
 
+    ContentType = apps.get_model("contenttypes", "ContentType")
 
     models_to_alter = [
         ModelContent(
@@ -102,10 +103,15 @@ def create_groups_permissions(apps, schema_editor):
             permissions=permissions_for_this_role
         )
 
+        Group = apps.get_model("auth", "Group")
+        Permission = apps.get_model("auth", "Permission")
+
         for model in models_to_alter:
             permissions_model.apply(
                 model = model.model,
-                content_type = model.content_type
+                content_type = model.content_type,
+                Group = Group,
+                Permission = Permission,
             )
 
 
@@ -125,6 +131,10 @@ def reverse_migration(apps, schema_editor):
         Role.customer: ['view'],
     }
 
+    ContentType = apps.get_model("contenttypes", "ContentType")
+    Group = apps.get_model("auth", "Group")
+    Permission = apps.get_model("auth", "Permission")
+
     for model in models_to_alter:
         content_type_for_this_model = ContentType.objects.get_for_model(model)
 
@@ -136,7 +146,9 @@ def reverse_migration(apps, schema_editor):
 
             permissions_for_this_group.remove(
                 model=model,
-                content_type=content_type_for_this_model
+                content_type=content_type_for_this_model,
+                Group=Group,
+                Permission=Permission
             )
 
 
