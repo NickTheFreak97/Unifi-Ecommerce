@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "catalog.apps.CatalogConfig",
     "users.apps.UsersConfig",
+    "payment.apps.PaymentConfig",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
 ]
