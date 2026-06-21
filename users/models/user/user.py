@@ -13,4 +13,10 @@ class User(AbstractUser):
     countryCode = models.CharField(max_length=2, null=True)
     sessionID = models.CharField(max_length=63)
     isVerified = models.BooleanField(default=False)
-    preferred_payment_strategy = models.ForeignKey(PaymentStrategy, on_delete=models.CASCADE, null=True, blank=True)
+    preferred_payment_strategy = models.ForeignKey(
+        PaymentStrategy,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='preferred_payment_strategy_for_user'
+    )

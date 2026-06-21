@@ -1,7 +1,6 @@
 from django.db import models
 import uuid
 
-from users.models.user import user
 from payment.models.payment_method import PaymentMethod
 
 class PaymentStrategy(models.Model):
@@ -14,7 +13,7 @@ class PaymentStrategy(models.Model):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(user.User, on_delete=models.CASCADE)
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
     method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
     isActive = models.BooleanField(default=False)
     provider_token = models.CharField(max_length=255)

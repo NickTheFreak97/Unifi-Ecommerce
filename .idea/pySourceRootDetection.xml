@@ -3,8 +3,9 @@
   <component name="PySourceRootDetectionService">
     <option name="sourcePathsSet">
       <set>
-        <option value="$PROJECT_DIR$/Unifi_Ecommerce/models" />
         <option value="$PROJECT_DIR$/Unifi_Ecommerce/products/models" />
+        <option value="$PROJECT_DIR$/Unifi_Ecommerce/models" />
+        <option value="$PROJECT_DIR$/payment" />
       </set>
     </option>
   </component>
