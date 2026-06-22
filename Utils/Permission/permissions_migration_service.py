@@ -28,15 +28,15 @@ class PermissionsMigrationService:
         ContentType = apps.get_model("contenttypes", "ContentType")
 
         group = Group.objects.get(name=group_name)
-        content_type_for_model = ContentType.objects.get(
+        content_type_for_model, _ = ContentType.objects.get_or_create(
             app_label=model_app,
             model=model_name.lower(),
         )
 
-        all_permissions_codenames = list()
-
-        for permission_name in permission_names:
-            all_permissions_codenames.append(f"{permission_name}_{content_type_for_model._meta.model_name}")
+        all_permissions_codenames = [
+            f"{permission_name}_{model_name.lower()}"
+            for permission_name in permission_names
+        ]
 
         all_permissions = list(
             Permission.objects.filter(

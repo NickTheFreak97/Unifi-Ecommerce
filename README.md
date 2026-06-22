@@ -1,5 +1,14 @@
 # Unifi-Ecommerce
 
+## Requirements
+This repo runs on `Django 6.0.4` which requires `Python >= 3.12`.
+I decided to use `PostgreSQL` as DBMS since I got familiar with it during the Basi di Dati class. Be aware that `pgadmin` image requires PostgreSQL driver to be installed 
+because during the setup process it builds from source. If you're on MacOS and don't have it already, and if `brew` is installed, you can get it by running in cli:
+
+```commandline
+brew install postgresql
+```
+
 ## User perspective
 A user can browse products. The home page of the shop shows a list of recommended, on sale, for you products, possibly organized by category. 
 
@@ -70,4 +79,5 @@ To inspect the database content, connect to `localhost:5050` and register a new 
 - Port: `5432` (or the port specified under `db` in `docker.compose.yml`)
 - Maintenance database: `unifi_db` (or the value specified in `.env.dev` under `POSTGRES_DB`)
 - Username and Password: specified in `.env.dev` under `POSTGRES_USER` / `POSTGRES_PASSWORD`
+
 
