@@ -18,7 +18,8 @@ class GroupPermission:
         self.group = group
         self.permissions = permissions
 
-    def apply(self, model: Type[models.Model], content_type: ContentType, Group: Type[Group], Permission: Type[Permission]):
+
+    def apply(self, model: Type[models.Model], content_type: ContentType, Group: Type[Group]):
         group = Group.objects.get(name=self.group)
 
         permissions = list()
@@ -33,7 +34,7 @@ class GroupPermission:
         group.permissions.add(*permissions_models)
 
 
-    def remove(self, model, content_type, Group: Type[Group], Permission: Type[Permission]):
+    def remove(self, model, content_type, Group: Type[Group]):
         group = Group.objects.get(name=self.group)
 
         permissions = list()
@@ -104,14 +105,12 @@ def create_groups_permissions(apps, schema_editor):
         )
 
         Group = apps.get_model("auth", "Group")
-        Permission = apps.get_model("auth", "Permission")
 
         for model in models_to_alter:
             permissions_model.apply(
                 model = model.model,
                 content_type = model.content_type,
                 Group = Group,
-                Permission = Permission,
             )
 
 
@@ -133,7 +132,6 @@ def reverse_migration(apps, schema_editor):
 
     ContentType = apps.get_model("contenttypes", "ContentType")
     Group = apps.get_model("auth", "Group")
-    Permission = apps.get_model("auth", "Permission")
 
     for model in models_to_alter:
         content_type_for_this_model = ContentType.objects.get_for_model(model)
@@ -148,7 +146,6 @@ def reverse_migration(apps, schema_editor):
                 model=model,
                 content_type=content_type_for_this_model,
                 Group=Group,
-                Permission=Permission
             )
 
 

@@ -15,7 +15,7 @@ class User(AbstractUser):
     isVerified = models.BooleanField(default=False)
     preferred_payment_strategy = models.ForeignKey(
         PaymentStrategy,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE, # @TODO: Let's change this to SET_NULL, I don't wanna delete the user when the payment method changes.
         null=True,
         blank=True,
         related_name='preferred_payment_strategy_for_user'
