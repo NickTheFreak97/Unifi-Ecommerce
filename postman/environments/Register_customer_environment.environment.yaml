@@ -1,0 +1,8 @@
+name: Register_customer_environment
+values:
+  - key: username
+    value: ''
+  - key: email
+    value: ''
+  - key: password
+    value: ''

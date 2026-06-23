@@ -1,0 +1,23 @@
+$kind: http-request
+name: Create Category - OK
+url: http://localhost:8000/staff/products/create_category/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "name": {{$randomAlphaNumeric}},
+        "refresh": "{{refresh_token}}"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Category creation - OK", function() {
+          pm.response.to.have.status(201)
+      })
+    language: text/javascript
+order: 331113974084240

@@ -1,0 +1,19 @@
+$kind: http-request
+name: Refresh token - OK
+url: http://localhost:8000/users/token/refresh/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "refresh": "{{refresh}}"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: '{{access_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: pm.environment.set("refresh", pm.response.json().refresh)
+order: 4484329615549629

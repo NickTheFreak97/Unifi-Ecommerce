@@ -1,0 +1,23 @@
+$kind: http-request
+name: Register staff member - OK
+url: http://localhost:8000/users/register_staff/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "username": "{{$randomUserName}}",
+        "email": "{{$randomEmail}}",
+        "password": "{{$randomPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |
+      pm.test("Staff member registered correctly", function() {
+          pm.response.to.have.status(201)
+      })
+
+      pm.environment.set('refresh_token', pm.response.json().refresh)
+      pm.environment.set('access_token', pm.response.json().access)
+    language: text/javascript
+order: 4194468814058898

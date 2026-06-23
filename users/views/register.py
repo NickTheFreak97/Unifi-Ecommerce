@@ -47,7 +47,11 @@ class RegisterCustomer(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        created_user = __create_user__(request.data['email'], request.data['username'], request.data['password'])
+        created_user = __create_user__(
+            request.data.get('email'),
+            request.data.get('username'),
+            request.data.get('password')
+        )
 
         if isinstance(created_user, User):
             customer_group = Group.objects.get(name=Role.customer)
@@ -57,7 +61,8 @@ class RegisterCustomer(APIView):
             return Response({
                 'success': 'created a new user',
                 'id': created_user.id,
-                'token': str(token_for_new_user)
+                "refresh": str(token_for_new_user),
+                "access": str(token_for_new_user.access_token),
                 },
                 status=status.HTTP_201_CREATED
             )
@@ -68,7 +73,11 @@ class RegisterCustomer(APIView):
 class RegisterStaffMember(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
-        created_user = __create_user__(request.data['email'], request.data['username'], request.data['password'])
+        created_user = __create_user__(
+            request.data.get('email'),
+            request.data.get('username'),
+            request.data.get('password')
+        )
 
         if isinstance(created_user, User):
             staff_group = Group.objects.get(name=Role.staff)
