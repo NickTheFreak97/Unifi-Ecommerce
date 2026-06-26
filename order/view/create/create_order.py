@@ -1,6 +1,4 @@
 from datetime import timedelta
-
-import pycountry
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -12,14 +10,15 @@ from .create_order_serializer import CreateOrderSerializer
 from order.utils.CartHash import cart_hash
 import os
 from order.models import Order, OrderStatus
-from django_countries.fields import CountryField
+from catalog.models import ProductVariant
 
 
 
 class CreateOrder(APIView):
     permission_classes = [AllowAny]
 
-    def make_queue_identity(self, request, email: str | None = None) -> Q:
+    @classmethod
+    def make_queue_identity(cls, request, email: str | None = None) -> Q:
         if request.user.is_authenticated:
             return models.Q(user=request.user)
 
@@ -57,48 +56,33 @@ class CreateOrder(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             else:
-                if len(shipping_country) != 2 or not pycountry.countries.get(alpha_2=shipping_country.upper()):
+                serializer = CreateOrderSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+
+                cart = serializer.validated_data['cart']
+                cart_digest = cart_hash(cart)
+
+                try:
+                    minutes = int(os.getenv("CART_DELTA_MINUTES", "30"))
+                except ValueError:
+                    minutes = 30
+
+                duplication_cutoff = timezone.now() - timedelta(minutes=minutes)
+
+                candidate_duplicate = Order.objects.filter(
+                    CreateOrder.make_queue_identity(request, email),
+                    cart_hash=cart_digest,
+                    created_at__gte=duplication_cutoff,
+                    status__in=[OrderStatus.requires_confirmation, OrderStatus.action_required],
+                ).first()
+
+                if not candidate_duplicate:
+                    pass
+                else:
+                    # At this point I expect items to already have been cloned, no further action required.
                     return Response(
                         {
-                            'message': 'You provided an invalid country code in the sense of ISO 3166-1 alpha-2',
+                            'message': 'Order was already created',
                         },
-                        status=status.HTTP_400_BAD_REQUEST
+                        status=status.HTTP_200_OK
                     )
-                else:
-                    serializer = CreateOrderSerializer(data=request.data)
-                    serializer.is_valid(raise_exception=True)
-
-                    cart = serializer.validated_data['cart']
-                    cart_digest = cart_hash(cart)
-
-                    try:
-                        minutes = int(os.getenv("CART_DELTA_MINUTES", "30"))
-                    except ValueError:
-                        minutes = 30
-
-                    duplication_cutoff = timezone.now() - timedelta(minutes=minutes)
-
-                    candidate_duplicate = Order.objects.filter(
-                        self.make_queue_identity(request, email),
-                        cart_hash=cart_digest,
-                        created_at__gte=duplication_cutoff,
-                        status__in=[OrderStatus.requires_confirmation, OrderStatus.action_required],
-                    ).first()
-
-                    if not candidate_duplicate:
-                        # @TODO: Let's copy cart items to OrderedItem and create a new order
-                        print("")
-                    else:
-                        # At this point I expect items to already have been cloned, no further action required.
-                        print("")
-                        return Response(
-                            {
-                                'message': 'Order was already created',
-                            },
-                            status=status.HTTP_200_OK
-                        )
-
-
-
-
-

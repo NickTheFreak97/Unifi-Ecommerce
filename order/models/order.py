@@ -26,7 +26,7 @@ class Order(models.Model):
     shipping_municipality = models.CharField(max_length=31)
     shipping_country = models.CharField(max_length=2)
     time_of_creation = models.DateField(auto_now_add=True)
-    cart_hash = models.CharField(max_length=64, db_index=True, default=None)
+    cart_hash = models.CharField(max_length=64, db_index=True, default=None, unique=True)
     guest_token = models.UUIDField(null=True, blank=True, db_index=True)
 
     class Meta:
