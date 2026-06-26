@@ -18,6 +18,13 @@ class CreateOrderSerializer(serializers.Serializer):
     municipality = serializers.CharField(source='shipping_municipality')
     country = serializers.CharField(source='shipping_country')
     cart = OrderCreationSerializer(many=True, allow_empty=False)
+    currency = serializers.CharField(source='currency')
+
+    def validate_currency(self, currency):
+        if pycountry.currencies.get(alpha_3=currency) is None:
+            raise serializers.ValidationError('Invalid currency code in the sense of ISO 4217.')
+        else:
+            return currency
 
     def validate_shipping_country(self, candidate_country_code):
         if len(candidate_country_code) != 2 or not pycountry.countries.get(alpha_2=candidate_country_code.upper()):
