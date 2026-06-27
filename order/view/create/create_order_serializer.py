@@ -8,7 +8,7 @@ class OrderCreationSerializer(serializers.Serializer):
         slug_field='barcode',
         queryset=ProductVariant.objects.all()
     )
-    order_amount = serializers.IntegerField(min_value=1)
+    amount_ordered = serializers.IntegerField(min_value=1)
 
 
 class CreateOrderSerializer(serializers.Serializer):
@@ -21,7 +21,7 @@ class CreateOrderSerializer(serializers.Serializer):
     currency = serializers.CharField(source='currency')
 
     def validate_currency(self, currency):
-        if pycountry.currencies.get(alpha_3=currency) is None:
+        if pycountry.currencies.get(alpha_3=currency.upper()) is None:
             raise serializers.ValidationError('Invalid currency code in the sense of ISO 4217.')
         else:
             return currency
@@ -40,7 +40,8 @@ class CreateOrderSerializer(serializers.Serializer):
             raise serializers.ValidationError("Empty cart.")
         else:
             if len(barcodes) != len(set(barcodes)):
-                raise serializers.ValidationError("Duplicate products are not allowed. Please group into a single product.")
+                raise serializers.ValidationError(
+                    "Duplicate products are not allowed. Please group into a single product.")
             else:
                 db_products_for_barcodes = ProductVariant.objects.filter(barcode__in=barcodes)
                 db_barcode_to_product_map = {product.barcode: product for product in db_products_for_barcodes}
@@ -53,44 +54,23 @@ class CreateOrderSerializer(serializers.Serializer):
                     })
                 else:
                     product_barcode_to_order_amount_map = {
-                        cart_item["product"].barcode: cart_item["order_amount"]
+                        cart_item["product"].barcode: cart_item["amount_ordered"]
                         for cart_item in candidate_cart
                     }
 
-                    for cart_item in candidate_cart:
-                        product = cart_item.get("product")
-                        amount = cart_item.get("order_amount")
+                    insufficient_stock_items = []
 
-                        if product is None or amount is None:
-                            raise serializers.ValidationError(
-                                "Invalid input parameters. Properly specify a product and an amount for each cart item"
-                            )
-                        else:
-                            for product_obj in db_products_for_barcodes:
-                                matching_cart_item = product_barcode_to_order_amount_map.get(product_obj.barcode)
+                    for product_obj in db_products_for_barcodes:
+                        matching_cart_item_requested_amount = product_barcode_to_order_amount_map.get(
+                            product_obj.barcode)
 
-                                if matching_cart_item is None:
-                                    raise serializers.ValidationError(
-                                        f"Invalid barcode: {product_obj.barcode} does not map to a product."
-                                    )
-                                else:
-                                    insufficient_stock_items = []
+                        if product_obj.stock < matching_cart_item_requested_amount:
+                            insufficient_stock_items.append(product_obj.barcode)
 
-                                    for product_obj in db_products_for_barcodes:
-                                        matching_cart_item_requested_amount = product_barcode_to_order_amount_map.get(product_obj.barcode)
-
-                                        if matching_cart_item_requested_amount is None:
-                                            raise serializers.ValidationError(
-                                                f"Product {product_obj.barcode} didn't specify an order amount in the cart."
-                                            )
-                                        else:
-                                            if product_obj.stock < matching_cart_item_requested_amount:
-                                                insufficient_stock_items.append(product_obj.barcode)
-
-                                    if insufficient_stock_items:
-                                        raise serializers.ValidationError({
-                                            'message': "At least one of the specified order requested amounts exceeds availability in stock.",
-                                            'product_barcode': insufficient_stock_items
-                                        })
+                    if insufficient_stock_items:
+                        raise serializers.ValidationError({
+                            'message': "At least one of the specified order requested amounts exceeds availability in stock.",
+                            'product_barcode': insufficient_stock_items
+                        })
 
                     return candidate_cart
