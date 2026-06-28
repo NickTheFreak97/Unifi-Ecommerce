@@ -1,10 +1,11 @@
 import logging
-from django.db.models import F
+from django.db.models import Q, F
 from celery import shared_task
 from order.utils.CartHash import SerializableCartItem
 from order.models import Order, OrderedItem, OrderStatus
 from catalog.models import ProductVariant
 from django.db import transaction
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,9 @@ def reset_stale_cart_stock(order_id: str, cart: list[SerializableCartItem]):
 
         if matching_order.status in { OrderStatus.action_required, OrderStatus.requires_confirmation }:
             products = ProductVariant.objects.filter(
-                barcode__in={ cart_item["product_barcode"] for cart_item in cart }
+                barcode__in={cart_item["product_barcode"] for cart_item in cart}
+            ).filter(
+                Q(product__timeOfDeletion__isnull=True) | Q(product__timeOfDeletion__gt=timezone.now())
             )
 
             barcode_to_product_map = { product.barcode : product for product in products }

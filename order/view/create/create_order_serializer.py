@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from catalog.models import ProductVariant
+from django.db.models import Q
+from django.utils import timezone
 import pycountry
 
 
@@ -9,6 +11,12 @@ class OrderCreationSerializer(serializers.Serializer):
         queryset=ProductVariant.objects.all()
     )
     amount_ordered = serializers.IntegerField(min_value=1)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['product'].queryset = ProductVariant.objects.filter(
+            Q(product__timeOfDeletion__isnull=False) | Q(product__timeOfDeletion__gte=timezone.now())
+        )
 
 
 class CreateOrderSerializer(serializers.Serializer):
