@@ -27,11 +27,12 @@ class CreateCategory(APIView):
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 else:
-                    Category.objects.create(name=request.data['name'])
+                    new_category = Category.objects.create(name=request.data['name'])
 
                     return Response(
                         {
-                            'message': 'Category successfully created'
+                            'message': 'Category successfully created',
+                            'category': new_category.name
                         },
                         status=status.HTTP_201_CREATED
                     )

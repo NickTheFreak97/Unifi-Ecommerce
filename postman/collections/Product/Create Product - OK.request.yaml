@@ -1,0 +1,36 @@
+$kind: http-request
+name: Create Product - OK
+url: http://localhost:8000/staff/products/create/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+            "barcode": "{{random_barcode}}",
+            "name": "{{$randomAlphaNumeric}}",
+            "description": "{{$randomAlphaNumeric}}<",
+            "unit_price": {{random_price}},
+            "currency": "EUR",
+            "stock": {{random_stock}},
+            "datasheet": "{\"color\":\"red\"}",
+            "category": "{{new_category_name}}",
+            "refresh": "{{refresh_token}}"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
+scripts:
+  - type: beforeRequest
+    code: |-
+      pm.variables.set("random_barcode", Array.from(crypto.getRandomValues(new Uint8Array(127)), b => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"[b % 62]).join(""));
+      pm.variables.set("random_price", Math.floor(Math.random() * (100 - 10 + 1)) + 10);
+      pm.variables.set("random_stock", Math.floor(Math.random() * (100 - 10 + 1)) + 10);
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('product creation successful', function() {
+          pm.require(pm.response.to.have.status(200))
+      })
+    language: text/javascript
+order: 1782224951759

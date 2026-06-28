@@ -26,7 +26,7 @@ class CreateOrderSerializer(serializers.Serializer):
         else:
             return currency
 
-    def validate_shipping_country(self, candidate_country_code):
+    def validate_country(self, candidate_country_code):
         if len(candidate_country_code) != 2 or not pycountry.countries.get(alpha_2=candidate_country_code.upper()):
             raise serializers.ValidationError(
                 "Invalid ISO 3166-1 alpha-2 country code."
@@ -64,7 +64,7 @@ class CreateOrderSerializer(serializers.Serializer):
                         matching_cart_item_requested_amount = product_barcode_to_order_amount_map.get(
                             product_obj.barcode)
 
-                        if product_obj.stock < matching_cart_item_requested_amount:
+                        if matching_cart_item_requested_amount is None or product_obj.stock < matching_cart_item_requested_amount:
                             insufficient_stock_items.append(product_obj.barcode)
 
                     if insufficient_stock_items:

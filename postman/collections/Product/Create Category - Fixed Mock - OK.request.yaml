@@ -1,0 +1,18 @@
+$kind: http-request
+name: Create Category - Fixed Mock - OK
+url: http://localhost:8000/staff/products/create_category/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "name": "Barware"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Barware creation successful', function() {
+          pm.require(pm.response.to.have.status(200))
+      })
+    language: text/javascript
+order: 2603618138858386

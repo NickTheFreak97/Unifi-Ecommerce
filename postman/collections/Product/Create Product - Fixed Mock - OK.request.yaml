@@ -1,0 +1,14 @@
+$kind: http-request
+url: http://localhost:8000/staff/products/create/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "refresh": "{{refresh_token}}"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
+order: 3002757222200059

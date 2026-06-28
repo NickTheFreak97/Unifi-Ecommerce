@@ -1,12 +1,11 @@
 $kind: http-request
-name: Create Category - OK
 url: http://localhost:8000/staff/products/create_category/
 method: POST
 body:
   type: json
   content: |-
     {
-        "name": {{$randomAlphaNumeric}},
+        "name": "{{$randomAlphaNumeric 12}}",
         "refresh": "{{refresh_token}}"
     }
 auth:
@@ -19,5 +18,7 @@ scripts:
       pm.test("Category creation - OK", function() {
           pm.response.to.have.status(201)
       })
+
+      pm.environment.set('new_category_name', pm.response.json().category)
     language: text/javascript
 order: 331113974084240

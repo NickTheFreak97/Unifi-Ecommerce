@@ -1,3 +1,4 @@
 from .create_category import CreateCategory
+from .bulk_create_categories import BulkCreateCategories
 from .create_product import CreateProduct
 from .restock_product import RestockProduct

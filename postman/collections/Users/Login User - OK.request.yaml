@@ -1,0 +1,19 @@
+$kind: http-request
+name: Login User - OK
+url: ""
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "username": "johnny",
+        "password": "amosololuca"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('login successful', function() {
+          pm.require(pm.response.to.have.status(200))
+      })
+    language: text/javascript
+order: 4499747303794717

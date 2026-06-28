@@ -1,0 +1,23 @@
+$kind: http-request
+name: Bulk Create Category - Fixed Mock - OK
+url: http://localhost:8000/staff/products/bulk_create_categories/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "categories": [
+            "Barware",
+            "Mixology",
+            "Syrups",
+            "Liquors",
+            "Spirits"
+        ],
+        "refresh": "{{refresh_token}}"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
+examples: .resources/Bulk Create Category - Fixed Mock - OK.resources/examples
+order: 3497808591282597

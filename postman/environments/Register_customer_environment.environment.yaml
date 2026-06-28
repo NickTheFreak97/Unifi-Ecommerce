@@ -6,3 +6,9 @@ values:
     value: ''
   - key: password
     value: ''
+  - key: refresh_token
+    value: ''
+  - key: access_token
+    value: ''
+  - key: new_category_name
+    value: ''
