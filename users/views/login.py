@@ -7,6 +7,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .JWT.jwt_serializer import JWTSerializer
 
+from django.conf import settings
+
+
 class LoginUser(APIView):
     permission_classes = [AllowAny]
 
@@ -25,8 +28,7 @@ class LoginUser(APIView):
 
         if user is not None:
             refresh_token = RefreshToken.for_user(user)
-
-            return Response(
+            response = Response(
                 {
                     "user": user.get_username(),
                     "access": str(refresh_token.access_token),
@@ -34,6 +36,18 @@ class LoginUser(APIView):
                 },
                 status=status.HTTP_200_OK
             )
+
+            response.set_cookie(
+                key='refresh_token',
+                value=str(refresh_token),
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite="Lax",
+                path='users/auth',
+                max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
+            )
+
+            return response
         else:
             return Response(
             {

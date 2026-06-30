@@ -1,19 +1,22 @@
 $kind: http-request
 name: Login User - OK
-url: ""
+url: http://localhost:8000/users/login/
 method: POST
 body:
   type: json
   content: |-
     {
-        "username": "johnny",
+        "username": "lorenzo",
         "password": "amosololuca"
     }
 scripts:
   - type: afterResponse
-    code: |-
+    code: |
       pm.test('login successful', function() {
           pm.require(pm.response.to.have.status(200))
       })
+
+      pm.environment.set('refresh_token', pm.response.json().refresh)
+      pm.environment.set('access_token', pm.response.json().access)
     language: text/javascript
 order: 4499747303794717

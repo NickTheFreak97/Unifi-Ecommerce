@@ -6,15 +6,17 @@ body:
   type: json
   content: |-
     {
-            "barcode": "{{random_barcode}}",
-            "name": "{{$randomAlphaNumeric}}",
-            "description": "{{$randomAlphaNumeric}}<",
-            "unit_price": {{random_price}},
-            "currency": "EUR",
-            "stock": {{random_stock}},
-            "datasheet": "{\"color\":\"red\"}",
-            "category": "{{new_category_name}}",
-            "refresh": "{{refresh_token}}"
+      "barcode": "{{random_barcode}}",
+      "name": "{{$randomAlphaNumeric}}",
+      "description": "{{$randomAlphaNumeric}}",
+      "price": {{random_price}},
+      "currency": "EUR",
+      "stock": {{random_stock}},
+      "datasheet": {
+        "color": "red"
+      },
+      "category": "{{new_category_name}}",
+      "refresh": "{{refresh_token}}"
     }
 auth:
   type: bearer

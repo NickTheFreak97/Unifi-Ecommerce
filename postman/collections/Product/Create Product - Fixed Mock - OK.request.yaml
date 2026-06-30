@@ -1,11 +1,19 @@
 $kind: http-request
+name: Create Product - Fixed Mock - OK
 url: http://localhost:8000/staff/products/create/
 method: POST
 body:
   type: json
   content: |-
     {
-        "refresh": "{{refresh_token}}"
+      "barcode": "A7K9Q2M4Z8T6R1V5N3B7C0X9L2P8H6J4D1S5F7G9W3E2Y8U6I4O1K7M9Z3X5C8V2B6N4Q1T7R9A3P5S8D2F6G1H9J4L7K0M3Z8X5C2V9B1N6Q4W7E3R8T2Y5U9I1O6P",
+      "name": "Monin Butterfly Pea Syrup - 700ml",
+      "description": "Add a touch of floral notes to your cocktail",
+      "price": 12.50,
+      "currency": "EUR",
+      "stock": 12,
+      "category": "Barware",
+      "refresh": "{{refresh_token}}"
     }
 auth:
   type: bearer

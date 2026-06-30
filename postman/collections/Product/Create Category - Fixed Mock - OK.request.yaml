@@ -6,8 +6,13 @@ body:
   type: json
   content: |-
     {
-        "name": "Barware"
+        "name": "Barware",
+        "refresh": "{{refresh_token}}"
     }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
 scripts:
   - type: afterResponse
     code: |-

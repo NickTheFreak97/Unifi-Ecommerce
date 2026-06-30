@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models.user.user import User
 from users.models.user.roles import Role
+from django.conf import settings
 
 
 def __create_user__(email, username, password):
@@ -58,7 +59,7 @@ class RegisterCustomer(APIView):
             created_user.groups.add(customer_group)
 
             token_for_new_user = RefreshToken.for_user(created_user)
-            return Response({
+            response = Response({
                 'success': 'created a new user',
                 'id': created_user.id,
                 "refresh": str(token_for_new_user),
@@ -66,6 +67,18 @@ class RegisterCustomer(APIView):
                 },
                 status=status.HTTP_201_CREATED
             )
+
+            response.set_cookie(
+                key='refresh_token',
+                value=str(token_for_new_user),
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite="Lax",
+                path='users/auth',
+                max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
+            )
+
+            return response
         else:
             return created_user
 
@@ -84,7 +97,7 @@ class RegisterStaffMember(APIView):
             created_user.groups.add(staff_group)
 
             token_for_new_user = RefreshToken.for_user(created_user)
-            return Response({
+            response = Response({
                 'success': 'created a new staff member',
                 'id': created_user.id,
                 "refresh": str(token_for_new_user),
@@ -92,5 +105,17 @@ class RegisterStaffMember(APIView):
             },
                 status=status.HTTP_201_CREATED
             )
+
+            response.set_cookie(
+                key='refresh_token',
+                value=str(token_for_new_user),
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite="Lax",
+                path='users/auth',
+                max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
+            )
+
+            return response
         else:
             return created_user

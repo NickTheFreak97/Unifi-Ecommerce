@@ -1,11 +1,12 @@
 $kind: http-request
+name: Create Category - OK
 url: http://localhost:8000/staff/products/create_category/
 method: POST
 body:
   type: json
   content: |-
     {
-        "name": "{{$randomAlphaNumeric 12}}",
+        "name": "{{$randomAlphaNumeric}}",
         "refresh": "{{refresh_token}}"
     }
 auth:

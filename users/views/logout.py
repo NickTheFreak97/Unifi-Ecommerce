@@ -17,9 +17,13 @@ class LogoutUser(APIView):
         refresh_token = RefreshToken(request.data.get("refresh"))
         refresh_token.blacklist()
 
-        return Response(
+        response = Response(
             {
                 "detail": "success"
             },
             status=status.HTTP_205_RESET_CONTENT
         )
+
+        response.delete_cookie('refresh_token', path='users/auth')
+
+        return response
