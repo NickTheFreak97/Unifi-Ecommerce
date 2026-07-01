@@ -42,4 +42,4 @@ class CreateCategory(APIView):
                         'error': f"A user with groups {request.user.groups.all()[0]} cannot add a new category"
                     },
                     status=status.HTTP_401_UNAUTHORIZED
-                )w
+                )

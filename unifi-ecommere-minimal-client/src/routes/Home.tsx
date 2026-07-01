@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router'
 
 
 const Home: React.FC = () => {
@@ -10,10 +11,14 @@ const Home: React.FC = () => {
             <nav>
                 <ul aria-label="sign up">
                     <li>
-                        Create Customer
+                        <Link to="/customer-signup">
+                            Create Customer
+                        </Link>
                     </li>
                     <li>
-                        Create store manager
+                        <Link to="/shop-staff-signup">
+                            Create store manager
+                        </Link>
                     </li>
                     <li>
                         Create webmaster
@@ -27,6 +32,20 @@ const Home: React.FC = () => {
                     </li>
                     <li>
                         Refresh JWT token
+                    </li>
+                </ul>
+
+                <hr inert/>
+
+                <ul aria-label='User endpoints'>
+                    <li>
+                        List all users by role
+                    </li>
+                    <li>
+                        Update user info
+                    </li>
+                    <li>
+                        List all roles
                     </li>
                 </ul>
 

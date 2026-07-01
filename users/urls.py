@@ -1,7 +1,5 @@
 from django.urls import path
-from JWTRefreshCookie import CookieTokenRefreshView
-from WhoAmI import WhoAmI
-from .views import RegisterCustomer, LogoutUser, RegisterStaffMember
+from .views import RegisterCustomer, LogoutUser, RegisterStaffMember, CookieTokenRefreshView, WhoAmI
 from .views.login import LoginUserViaJWT
 
 urlpatterns = [

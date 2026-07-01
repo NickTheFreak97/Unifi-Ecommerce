@@ -44,6 +44,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -54,7 +55,7 @@ MIDDLEWARE = [
     "order.middleware.GuestTokenMiddleware",
 ]
 
-
+CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -68,6 +69,7 @@ INSTALLED_APPS = [
     "catalog.apps.CatalogConfig",
     "users.apps.UsersConfig",
     "payment.apps.PaymentConfig",
+    'corsheaders',
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "order.apps.OrderConfig"
