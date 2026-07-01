@@ -24,6 +24,6 @@ class LogoutUser(APIView):
             status=status.HTTP_205_RESET_CONTENT
         )
 
-        response.delete_cookie('refresh_token', path='users/auth')
+        response.delete_cookie('refresh_token', path='/users/auth')
 
         return response

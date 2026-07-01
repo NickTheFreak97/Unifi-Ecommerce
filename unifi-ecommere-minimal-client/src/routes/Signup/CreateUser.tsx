@@ -1,7 +1,9 @@
-import React, { useState} from 'react'
-import { Alert, Button, Box, Stack, TextField } from '@mui/material'
+import React, { useState } from 'react'
+import { Alert, Button, Box, Stack, TextField, Chip } from '@mui/material'
 import JsonView from '@uiw/react-json-view'
 import { lightTheme } from '@uiw/react-json-view/light';
+import { http } from '../../API/axiosHTTP';
+import { useAuth, setAccessToken } from '../../context/AuthContext';
 
 interface IncompleteRequestError {
     error: string;
@@ -20,8 +22,7 @@ const responseToIncompleteRequest: IncompleteRequestError = {
 interface CreateUserProps {
     title: string;
     description: string;
-    onSubmit: (event: React.SubmitEvent<HTMLFormElement>, formData: User) => void
-
+    endpoint: string
 }
 
 interface User {
@@ -30,25 +31,43 @@ interface User {
     password: string,
 }
 
-const CreateUser: React.FC<CreateUserProps> = ({ title, description, onSubmit }) => {
+const CreateUser: React.FC<CreateUserProps> = ({ title, description, endpoint }) => {
+    const auth = useAuth();
+
     const [formData, setFormData ] = useState<User>({
         username: '',
         email: '',
         password: ''
     });
 
-    const handleChange = (field) => (event) => {
+    const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((prev) => ({ ...prev, [field]: event.target.value }));
     };
 
-    const onSubmitAction = (event) => {
+    const onSubmitAction = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
-        onSubmit(event, formData);
+
+        http.post(`/users/${endpoint}`, formData)
+            .then(success => {
+                if (!!success.data.access) {
+                    setAccessToken(success.data.access)
+                    auth.fetchUser()
+                }
+            })
+            .catch(error => {
+                console.error('error', error.response.data)
+            })
     };
+
 
     return (
         <main>
-            <h1>{ title }</h1>
+            <Stack sx={{
+                alignItems: 'flex-start'
+            }} direction='column'>
+                <h1>{ title }</h1>
+                <Chip label="POST" color="post" variant='outlined'/>
+            </Stack>
             <section>
                 <h2>Introduction</h2>
                 <h3>Use this endpoint to create a new user with customer role.</h3>

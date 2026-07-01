@@ -43,7 +43,7 @@ class LoginUser(APIView):
                 httponly=True,
                 secure=not settings.DEBUG,
                 samesite="Lax",
-                path='users/auth',
+                path='/users/auth',
                 max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
             )
 
