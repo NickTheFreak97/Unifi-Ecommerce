@@ -5,16 +5,16 @@ import Alert from "@mui/material/Alert";
 import { useAuth } from "../context/AuthContext";
 
 export const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isInitialized } = useAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (isInitialized) {
       setOpen(!isAuthenticated);
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isInitialized]);
 
-  if (isLoading) {
+  if (!isInitialized) {
     return null;
   }
 

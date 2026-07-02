@@ -14,6 +14,7 @@ import CreateUser from "./routes/Signup/CreateUser";
 import theme from "./theme/Theme";
 import AppShield from "./AppShield/AppShield";
 import Login from "./Login/Login";
+import Logout from "./routes/Logout/Logout";
 
 const router = createBrowserRouter([
   {
@@ -22,10 +23,8 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { 
-        element: <ProtectedRoute />,
-        children: [
-          { index: true, element: <Home /> }
-        ]
+        index: true,
+        element: <Home />
       },
       {
         path: '/customer-signup',
@@ -57,6 +56,17 @@ const router = createBrowserRouter([
       {
         path: '/login',
         element: <Login />
+      },
+
+      {
+        path: "/logout",
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "",
+            element: <Logout />
+          }
+        ]
       }
     ],
   },

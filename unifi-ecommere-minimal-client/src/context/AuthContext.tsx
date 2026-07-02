@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { http } from "../API/axiosHTTP";
 
 interface User {
@@ -23,9 +23,10 @@ interface AuthenticatedUserInfo {
     user: User | null;
     isLoading: boolean;
     isAuthenticated: boolean;
+    isInitialized: boolean;
     login: (username: string | null, password: string | null, onSuccess: ((user: User) => void) | null, onFail: ((error: any) => void) | null) => Promise<void>;
     fetchUser: () => Promise<void>;
-    logout: () => Promise<void>;
+    logout: (onSuccess: (() => void) | null, onError: ((error: any) => void) | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthenticatedUserInfo | null>(null);
@@ -33,8 +34,20 @@ const AuthContext = createContext<AuthenticatedUserInfo | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const didInit = useRef(false);
+
 
     useEffect(() => {
+        if (didInit.current) {
+            // Init already ran (StrictMode remount / HMR): make sure the
+            // gate is open instead of leaving isInitialized stuck at false.
+            setIsInitialized(true)
+            setIsLoading(false)
+            return
+        }
+        didInit.current = true
+
         setIsLoading(true)
         const storedAccessToken = localStorage.getItem('access_token')
 
@@ -83,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             })
             .finally(() => {
                 setIsLoading(false)
+                setIsInitialized(true)
             })
     }, [])
 
@@ -159,21 +173,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
     }, []);
 
-    const logout = useCallback(async () => {
+    const logout = useCallback(
+        async (
+            onSuccess: (() => void) | null,
+            onError: ((error: any) => void) | null
+        ) => {
         setIsLoading(true)
-        await http.post("/users/auth/logout/", undefined, {
+        await http.post("/users/auth/logout/", null, {
             headers: {
                 Authorization: `Bearer ${getAccessToken()}`
+            },
+            withCredentials: true
+        })
+        .then(successResponse => {
+            setAccessToken(null);
+            setUser(null);
+
+            if (!!onSuccess) {
+                onSuccess()
             }
         })
-        .finally(() => setIsLoading(false))
-
-        setAccessToken(null);
-        setUser(null);
+        .catch(error => {
+            if(!!onError) {
+                onError(error)
+            }
+        })
+        .finally(
+            () => {
+                setIsLoading(false)
+            }
+        )
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, fetchUser, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, isInitialized, fetchUser, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

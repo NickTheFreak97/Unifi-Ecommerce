@@ -99,7 +99,6 @@ class RegisterStaffMember(APIView):
             response = Response({
                 'success': 'created a new staff member',
                 'id': created_user.id,
-                "refresh": str(token_for_new_user),
                 "access": str(token_for_new_user.access_token),
             },
                 status=status.HTTP_201_CREATED

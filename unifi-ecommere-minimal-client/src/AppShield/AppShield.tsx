@@ -21,7 +21,9 @@ export default function AppShield() {
                           { userIdentity.user.username }
                         </li>
                         <li>
+                          <Link to="/logout">
                             Log out
+                          </Link>
                         </li>
                     </>
                 }
