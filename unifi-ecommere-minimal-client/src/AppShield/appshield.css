@@ -1,0 +1,8 @@
+header ul {
+    display: flex;
+    flex-direction: column;
+}
+
+header ul li {
+    display: inline-block;
+}

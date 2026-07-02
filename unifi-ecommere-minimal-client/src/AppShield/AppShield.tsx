@@ -1,6 +1,8 @@
 import { Outlet, Link } from "react-router";
 import { AppBar, Toolbar } from "@mui/material";
-import { useAuth, getAccessToken } from "./context/AuthContext";
+import { useAuth, getAccessToken } from "../context/AuthContext";
+
+import './appshield.css'
 
 export default function AppShield() {
     const userIdentity = useAuth();
@@ -14,9 +16,14 @@ export default function AppShield() {
                 
                 {
                     !userIdentity.isLoading && !!userIdentity.user &&
+                    <>
                         <li>
-                            { userIdentity.user.email }
+                          { userIdentity.user.username }
                         </li>
+                        <li>
+                            Log out
+                        </li>
+                    </>
                 }
             </ul>
         </Toolbar>

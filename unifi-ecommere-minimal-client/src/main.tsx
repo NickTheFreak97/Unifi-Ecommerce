@@ -12,7 +12,8 @@ import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import CreateUser from "./routes/Signup/CreateUser";
 import theme from "./theme/Theme";
-import AppShield from "./AppShield";
+import AppShield from "./AppShield/AppShield";
+import Login from "./Login/Login";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,11 @@ const router = createBrowserRouter([
           `}
           endpoint="register_staff/"
         />
+      },
+
+      {
+        path: '/login',
+        element: <Login />
       }
     ],
   },

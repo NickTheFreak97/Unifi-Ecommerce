@@ -28,7 +28,9 @@ const Home: React.FC = () => {
 
                 <ul aria-label="Login">
                     <li>
-                        Login
+                        <Link to="/login">
+                            Login
+                        </Link>
                     </li>
                     <li>
                         Refresh JWT token

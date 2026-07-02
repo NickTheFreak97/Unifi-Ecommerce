@@ -23,7 +23,7 @@ interface AuthenticatedUserInfo {
     user: User | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (username: string | null, password: string | null, onSuccess: ((user: User) => void) | null, onFail: ((error: any) => void) | null) => Promise<void>;
     fetchUser: () => Promise<void>;
     logout: () => Promise<void>;
 }
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         }
 
-        http.post(`users/auth/token/refresh/`, undefined, {
+        http.post(`/users/auth/token/refresh/`, undefined, {
             timeout: 5000,
             headers: {
                 Authorization: (!!accessToken) ? `Bearer ${getAccessToken()}` : undefined 
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     console.warn("Client expected `access` on successful response but response['access'] is not set.")
                 }
 
-                return http.get(`users/auth/who_am_i/`, {
+                return http.get(`/users/auth/who_am_i/`, {
                     headers: {
                         Authorization: `Bearer ${getAccessToken()}`
                     }
@@ -87,58 +87,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [])
 
 
-    const login = useCallback(async (email: string, password: string) => {
+    const login = useCallback(async (username: string | null, password: string | null, onSuccess: ((user: User) => void) | null, onFail: ((error: any) => void) | null) => {
         setIsLoading(true)
-        await http.post(
-            "users/auth/login/",
-            {
-                "email": email,
-                "password": password
-            }
-        ).then(
-            async response => {
-                if (!!response.data.access) {
-                    setAccessToken(response.data.access)
-                    await http.get(`users/auth/who_am_i/`, {
-                        headers: {
-                            Authorization: `Bearer ${getAccessToken()}`
-                        }
-                    })
-                        .then(
-                            response => {
-                                if (!!response.data.id && !!response.data.email && !!response.data.username) {
-                                    setUser({
-                                        "id": response.data.id,
-                                        "email": response.data.email,
-                                        "username": response.data.username
-                                    })
-                                } else {
-                                    console.warn("Incomplete who_am_i")
-                                }
-                            }
-                        )
-                        .finally(() => setIsLoading(false))
+        try {
+            const loginResponse = await http.post("/users/auth/login/", { username, password })
+
+            if (!loginResponse.data.access) {
+                console.warn("Client expected `access` on successful response but it was not set.")
+                setAccessToken(null)
+            } else {
+                setAccessToken(loginResponse.data.access)
+
+                const whoAmI = await http.get("/users/auth/who_am_i/", {
+                    headers: { Authorization: `Bearer ${loginResponse.data.access}` }
+                })
+
+                const { id, email, username: username } = whoAmI.data
+
+                if (!!id && !!email && !!username) {
+                    setUser(
+                        { id, email, username: username }
+                    )
+
+                    if (!!onSuccess) {
+                        onSuccess({ id, email, username: username })
+                    }
                 } else {
-                    console.warn("Client expected `access` on successful response but response['access'] is not set.")
-                    setAccessToken(null)
-                    setIsLoading(false)
+                    console.warn("Incomplete who_am_i")
                 }
             }
-        )
-            .catch(
-                error => {
-                    console.log(`Unable to perform login with status ${error.response?.status}, message: ${error.response?.data?.error}.`)
-                    setAccessToken(null)
-                    setIsLoading(false)
-                }
-            )
+
+        } catch (error: any) {
+            console.log(`Unable to perform login: ${error.response?.status ?? error.message}`)
+            setAccessToken(null)
+
+            if (!!onFail) {
+                onFail(error)
+            }
+        } finally {
+            setIsLoading(false)
+        }
     }, []);
+
 
 
     const fetchUser = useCallback(async () => {
         if (!!accessToken) {
             setIsLoading(true)
-            await http.get("users/auth/who_am_i/", {
+            await http.get("/users/auth/who_am_i/", {
                 headers: {
                     Authorization: `Bearer ${getAccessToken()}`,
                 },
@@ -165,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = useCallback(async () => {
         setIsLoading(true)
-        await http.post("users/auth/logout/", undefined, {
+        await http.post("/users/auth/logout/", undefined, {
             headers: {
                 Authorization: `Bearer ${getAccessToken()}`
             }
