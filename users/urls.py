@@ -9,6 +9,6 @@ urlpatterns = [
     path('auth/logout/', LogoutUser.as_view(), name='logout'),
     path('auth/token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('auth/who_am_i/', WhoAmI.as_view(), name='who_am_i'),
-    path('list_users_by_group/', LogoutUser.as_view(), name='logout'),
+    path('list_users_by_group/', ListAllUsersByGroup.as_view(), name='list_users_by_group'),
 ]
 

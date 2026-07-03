@@ -41,7 +41,9 @@ const Home: React.FC = () => {
 
                 <ul aria-label='User endpoints'>
                     <li>
-                        List all users by role
+                        <Link to="/list-users">
+                            List all users by role
+                        </Link>
                     </li>
                     <li>
                         Update user info

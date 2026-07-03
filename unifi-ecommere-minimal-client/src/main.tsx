@@ -15,6 +15,7 @@ import theme from "./theme/Theme";
 import AppShield from "./AppShield/AppShield";
 import Login from "./Login/Login";
 import Logout from "./routes/Logout/Logout";
+import ListAllUsers from "./routes/ListAllUsers";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,11 @@ const router = createBrowserRouter([
       },
 
       {
+        path: '/list-users',
+        element: <ListAllUsers />
+      },
+
+      {
         path: '/login',
         element: <Login />
       },
@@ -71,9 +77,6 @@ const router = createBrowserRouter([
     ],
   },
 ]);
-
-console.log(import.meta.env);
-console.log('MODE:', import.meta.env.MODE);
 
 
 createRoot(document.getElementById("root")!).render(
