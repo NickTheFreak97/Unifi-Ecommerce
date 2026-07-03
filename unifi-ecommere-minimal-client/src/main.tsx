@@ -16,6 +16,7 @@ import AppShield from "./AppShield/AppShield";
 import Login from "./Login/Login";
 import Logout from "./routes/Logout/Logout";
 import ListAllUsers from "./routes/ListAllUsers";
+import CreateCategory from "./routes/CreateCategory";
 
 const router = createBrowserRouter([
   {
@@ -52,6 +53,17 @@ const router = createBrowserRouter([
           `}
           endpoint="register_staff/"
         />
+      },
+      
+      {
+        path: "/create-category",
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "",
+            element: <CreateCategory />
+          }
+        ]
       },
 
       {

@@ -56,7 +56,9 @@ const Home: React.FC = () => {
                 <hr inert/>
                 <ul aria-label="Category endpoints">
                     <li>
-                        Create a new category
+                        <Link to="/create-category">
+                            Create a new category
+                        </Link>
                     </li>
                     <li>
                         List all categories

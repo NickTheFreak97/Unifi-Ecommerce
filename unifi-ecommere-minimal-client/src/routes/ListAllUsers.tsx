@@ -50,7 +50,7 @@ const ListAllUsers: React.FC = ( ) => {
                 alignItems: "flex-start"
             }}>
                 <h1>List all users by their role</h1>
-                <Chip label="POST" color="post" variant='outlined' />
+                <Chip label="GET" color="get" variant='outlined' />
             </Stack>
             <section>
                 <h2>Introduction</h2>

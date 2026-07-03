@@ -24,7 +24,7 @@ class CreateCategory(APIView):
                         {
                             'message': 'Category already exists'
                         },
-                        status=status.HTTP_400_BAD_REQUEST
+                        status=status.HTTP_409_CONFLICT
                     )
                 else:
                     new_category = Category.objects.create(name=request.data['name'])
