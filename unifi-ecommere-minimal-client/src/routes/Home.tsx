@@ -91,6 +91,11 @@ const Home: React.FC = () => {
                 <hr inert/>
                 <ul aria-label="Ordering">
                     <li>
+                        <Link to="/catalog">
+                            View Catalog
+                        </Link>
+                    </li>
+                    <li>
                         Place a new order
                     </li>
                 </ul>

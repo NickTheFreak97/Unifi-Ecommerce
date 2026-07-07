@@ -109,7 +109,7 @@ const mockProductCreationRequest: CreateProductRequest = {
 interface ProductCreationData {
     barcode: string
     name: string
-    description: string | null
+    description: string | undefined
     price: number
     currency: string
     stock: number

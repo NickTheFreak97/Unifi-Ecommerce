@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router";
 import { AppBar, Toolbar } from "@mui/material";
-import { useAuth, getAccessToken } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 import './appshield.css'
 

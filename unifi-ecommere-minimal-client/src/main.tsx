@@ -18,6 +18,7 @@ import Logout from "./routes/Logout/Logout";
 import ListAllUsers from "./routes/ListAllUsers";
 import CreateCategory from "./routes/CreateCategory";
 import CreateProduct from "./routes/CreateProduct";
+import Catalog from "./routes/Catalog";
 
 import './index.css'
 
@@ -99,6 +100,11 @@ const router = createBrowserRouter([
             element: <CreateProduct />
           }
         ]
+      },
+
+      {
+        path: '/catalog',
+        element: <Catalog />
       }
     ],
   },
