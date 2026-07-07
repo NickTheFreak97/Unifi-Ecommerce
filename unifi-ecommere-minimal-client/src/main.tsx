@@ -17,6 +17,9 @@ import Login from "./Login/Login";
 import Logout from "./routes/Logout/Logout";
 import ListAllUsers from "./routes/ListAllUsers";
 import CreateCategory from "./routes/CreateCategory";
+import CreateProduct from "./routes/CreateProduct";
+
+import './index.css'
 
 const router = createBrowserRouter([
   {
@@ -83,6 +86,17 @@ const router = createBrowserRouter([
           {
             path: "",
             element: <Logout />
+          }
+        ]
+      }, 
+
+      {
+        path: "/create-product",
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "",
+            element: <CreateProduct />
           }
         ]
       }

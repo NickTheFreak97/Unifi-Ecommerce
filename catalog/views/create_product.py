@@ -31,7 +31,15 @@ class CreateProduct(APIView):
             if barcode is None or name is None or description is None or unit_price is None or currency is None or stock is None:
                 return Response(
                     {
-                        'error': 'In order to create a product, you must specify at least a barcode, name, description, price, currency and stock'
+                        'error': 'In order to create a product, you must specify at least a barcode, name, description, price, currency and stock',
+                        'barcode': barcode,
+                        'name': name,
+                        'description': description,
+                        'unit_price': unit_price,
+                        'currency': currency,
+                        'stock': stock,
+                        'datasheet': datasheet,
+                        'category': category
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
@@ -96,8 +104,9 @@ class CreateProduct(APIView):
                 if not isinstance(unit_price, float) and not isinstance(unit_price, int):
                     return Response(
                         {
-                            'error': 'Unit price must be a real number.'
-                        },
+                            'error': 'Unit price must be a real number.',
+                            'unit_price': unit_price
+                    },
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 else:
@@ -105,6 +114,7 @@ class CreateProduct(APIView):
                         return Response(
                             {
                                 'error': 'Unit price cannot be negative',
+                                'unit_price': unit_price
                             },
                             status=status.HTTP_400_BAD_REQUEST
                         )
@@ -115,7 +125,7 @@ class CreateProduct(APIView):
                         {
                             'error': 'Product with this barcode already exists'
                         },
-                        status.HTTP_400_BAD_REQUEST
+                        status.HTTP_409_CONFLICT
                     )
                 else:
                     created_product = Product.objects.create(

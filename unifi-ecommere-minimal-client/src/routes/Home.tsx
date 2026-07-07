@@ -67,7 +67,9 @@ const Home: React.FC = () => {
 
                 <ul aria-label="Product endpoints">
                     <li>
-                        Create a new product
+                        <Link to="/create-product">
+                            Create a new product
+                        </Link>
                     </li>
                     <li>
                         Restock an existing product
