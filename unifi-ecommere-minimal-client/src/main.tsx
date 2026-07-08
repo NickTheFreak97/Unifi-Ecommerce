@@ -4,12 +4,13 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-
+import { Provider } from '@reduxjs/toolkit';
 
 import Home from "./routes/Home";
 import NotFound from "./routes/NotFound";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import { store } from "./Redux/store";
 import CreateUser from "./routes/Signup/CreateUser";
 import theme from "./theme/Theme";
 import AppShield from "./AppShield/AppShield";
@@ -113,11 +114,13 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <RouterProvider router={router} />
+    <Provider store={store}>
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <RouterProvider router={router} />
         </ThemeProvider>
       </AuthProvider>
+    </Provider>
   </StrictMode>,
 );
