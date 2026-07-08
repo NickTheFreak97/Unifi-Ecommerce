@@ -4,28 +4,28 @@ import { http } from '../API/axiosHTTP'
 import JsonView from '@uiw/react-json-view'
 import { lightTheme } from '@uiw/react-json-view/light'
 
-interface ProductVariant {
+export interface ProductVariant {
     barcode: string
     stock: number
     unit_price: number
 }
 
-interface Product {
+export interface Product {
     barcode: string
     name: string,
     product_variants: ProductVariant[]
 }
 
-interface Category {
+export interface Category {
     name: string
     products: Product[]
 }
 
-interface Response {
+export interface Catalog {
     catalog: Category[]
 }
 
-const mockResponse: Response = {
+const mockResponse: Catalog = {
     'catalog': [
         {
             name: "...",

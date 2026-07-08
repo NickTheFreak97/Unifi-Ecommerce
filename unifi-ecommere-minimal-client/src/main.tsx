@@ -4,7 +4,7 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Provider } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
 
 import Home from "./routes/Home";
 import NotFound from "./routes/NotFound";
@@ -20,7 +20,7 @@ import ListAllUsers from "./routes/ListAllUsers";
 import CreateCategory from "./routes/CreateCategory";
 import CreateProduct from "./routes/CreateProduct";
 import Catalog from "./routes/Catalog";
-
+import Cart from "./Cart";
 import './index.css'
 
 const router = createBrowserRouter([
@@ -106,6 +106,11 @@ const router = createBrowserRouter([
       {
         path: '/catalog',
         element: <Catalog />
+      },
+
+      {
+        path: '/cart',
+        element: <Cart />
       }
     ],
   },

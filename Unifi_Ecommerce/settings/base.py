@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "catalog.apps.CatalogConfig",
     "users.apps.UsersConfig",
     "payment.apps.PaymentConfig",
+    "cart.apps.CartConfig",
     'corsheaders',
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",

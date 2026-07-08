@@ -96,6 +96,11 @@ const Home: React.FC = () => {
                         </Link>
                     </li>
                     <li>
+                        <Link to="/cart">
+                            CRUD cart
+                        </Link>
+                    </li>
+                    <li>
                         Place a new order
                     </li>
                 </ul>

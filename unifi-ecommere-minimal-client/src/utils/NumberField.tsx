@@ -20,14 +20,16 @@ SSRInitialFilled.muiName = 'Input';
 export default function NumberField({
   id: idProp,
   label,
+  helperText = "Decimal separator is a comma (,)",
   error,
   size = 'medium',
   ...other
 }: BaseNumberField.Root.Props & {
   label?: React.ReactNode;
+  helperText?: React.ReactNode;
   size?: 'small' | 'medium';
   error?: boolean;
-}) {
+})  {
   let id = React.useId();
   if (idProp) {
     id = idProp;
@@ -106,9 +108,12 @@ export default function NumberField({
           />
         )}
       />
-      <FormHelperText id={`${id}-helper-text`} sx={{ ml: 0, '&:empty': { mt: 0 } }}>
-        Decimal separator is a comma (,)
-      </FormHelperText>
+      {
+        helperText &&
+          <FormHelperText id={`${id}-helper-text`} sx={{ ml: 0, '&:empty': { mt: 0 } }}>
+            { helperText }
+          </FormHelperText>
+      }        
     </BaseNumberField.Root>
   );
 }

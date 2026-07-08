@@ -61,6 +61,8 @@ class LoginUser(APIView):
             max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
         )
 
+        response.delete_cookie('guest_token', path='/')
+
         return response
 
 
