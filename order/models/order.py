@@ -1,6 +1,9 @@
 from django.db import models
-from django.db.models import TextChoices, constraints
+from django.db.models import TextChoices
 import uuid
+from django.db.models.functions import Length
+
+models.CharField.register_lookup(Length)
 
 class OrderStatus(TextChoices):
     requires_confirmation = "requires_confirmation", "Waiting for confirmation on staff's end"
@@ -26,8 +29,9 @@ class Order(models.Model):
     shipping_municipality = models.CharField(max_length=31)
     shipping_country = models.CharField(max_length=2)
     time_of_creation = models.DateField(auto_now_add=True)
-    cart_hash = models.CharField(max_length=64, db_index=True, default=None, unique=False)
+    cart_hash = models.CharField(max_length=64, db_index=True, default=None, unique=False, null=True, blank=False)
     guest_token = models.UUIDField(null=True, blank=True, db_index=True)
+
 
     class Meta:
         constraints = [
@@ -42,6 +46,32 @@ class Order(models.Model):
                     models.Q(user__isnull=True, guest_token__isnull=False)
                 ),
                 name='no_duplicate_identity_for_user'
+            ),
+
+            models.UniqueConstraint(
+                fields=['cart_hash', 'user'],
+                condition=~models.Q(status__in=[
+                    OrderStatus.canceled,
+                    OrderStatus.refunded,
+                ]),
+                name='one_active_order_per_cart',
+            ),
+
+            models.UniqueConstraint(
+                fields=['cart_hash', 'guest_token'],
+                condition=~models.Q(status__in=[
+                    OrderStatus.canceled,
+                    OrderStatus.refunded,
+                ]),
+                name='one_active_order_per_guest_cart',
+            ),
+
+            models.CheckConstraint(
+                condition=(
+                        models.Q(cart_hash__isnull=True) |
+                        models.Q(cart_hash__length=64)
+                ),
+                name='cart_hash_null_or_64_chars',
             ),
         ]
 

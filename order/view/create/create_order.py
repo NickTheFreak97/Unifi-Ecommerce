@@ -1,6 +1,6 @@
 from datetime import timedelta
-from django.db import models, transaction
-from django.db.models import Q, F
+from django.db import transaction
+from django.db.models import Q, F, QuerySet
 from django.utils import timezone
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
@@ -15,6 +15,11 @@ from order.models import Order, OrderStatus, OrderedItem
 from catalog.models import ProductVariant
 from order.tasks.cleanup_stock_reservation import reset_stale_cart_stock
 
+from typing import TypedDict
+
+class CartItem(TypedDict):
+    product: ProductVariant
+    amount: int
 
 
 # TODO: Could consider letting the client generate an idempotency key and optionally attach it to the request body.
@@ -101,14 +106,14 @@ class CreateOrder(APIView):
                             {
                                 'message': "Empty cart",
                             },
-                            status=status.HTTP_400_BAD_REQUEST
+                            status=status.HTTP_204_NO_CONTENT
                         )
                     else:
                         with transaction.atomic():
                             order = Order.objects.create(
                                 user=request.user if request.user.is_authenticated else None,
                                 email=serializer.validated_data['email'],
-                                price=0,  # FIXME: Add actual price computed from cart
+                                price=sum(item['product'].unitPrice * item['amount_ordered'] for item in cart),
                                 currency=serializer.validated_data['currency'],
                                 shipping_street=serializer.validated_data['street'],
                                 street_zipcode=serializer.validated_data['zipcode'],
@@ -123,40 +128,25 @@ class CreateOrder(APIView):
                                 barcode__in=cart_barcodes_to_ordered_amount_map.keys(),
                             )
 
-                            # TODO: Create a star topology to convert rates in case the request currency is different from that of the product variant instance
-                            items_to_create = [
-                                OrderedItem(
-                                    order=order,
-                                    product=product.barcode,
-                                    amount_ordered=cart_barcodes_to_ordered_amount_map.get(product.barcode),
-                                    unit_price_at_purchase_time=product.unitPrice,
-                                    currency=serializer.validated_data['currency']
+                            hydrated_cart = [
+                                CartItem(
+                                    product=product,
+                                    amount=cart_barcodes_to_ordered_amount_map[product.barcode]
                                 )
+
                                 for product in products_to_clone_query
+                                if cart_barcodes_to_ordered_amount_map[product.barcode] is not None
                             ]
 
-                            OrderedItem.objects.bulk_create(items_to_create)
+                            clone_products_to_order_items(
+                                order=order,
+                                cart=hydrated_cart,
+                                currency=serializer.validated_data['currency']
+                            )
 
-                            stock_updates: dict[str, int] = {
-                                product.barcode: cart_barcodes_to_ordered_amount_map[product.barcode]
-                                for product in products_to_clone_query
-                            }
+                            insufficient = decrease_stock_for_ordered_items(cart=hydrated_cart)
 
-                            locked = {
-                                p.barcode: p
-                                for p in ProductVariant.objects
-                                .select_for_update()
-                                .filter(barcode__in=stock_updates.keys())
-                                .order_by("barcode")
-                            }
-
-                            insufficient = [
-                                product_barcode for product_barcode, amount_ordered in stock_updates.items()
-                                if locked[product_barcode].stock < amount_ordered
-                            ]
-
-                            if insufficient:
-                                # FIXME: As I just found out, returning from a transaction in Django results in COMMIT. Must raise an exception to ROLLBACK.
+                            if len(insufficient) > 0:
                                 return Response(
                                     {
                                         'message': "Insufficient stock for at least one product",
@@ -165,20 +155,9 @@ class CreateOrder(APIView):
                                     status=status.HTTP_409_CONFLICT
                                 )
 
-                            for product_barcode, amount_ordered in stock_updates.items():
-                                ProductVariant.objects.filter(barcode=product_barcode).update(stock=F("stock") - amount_ordered)
-
-                            reset_stale_cart_stock_payload = [
-                                {
-                                    "product_barcode": product['product'].barcode,
-                                    "amount_ordered": product['amount_ordered'],
-                                }
-                                for product in cart
-                            ]
-
-                            reset_stale_cart_stock.apply_async(
-                                args = (order.id, reset_stale_cart_stock_payload),
-                                countdown = 60 * 15
+                            schedule_refill_stock_for_stale_orders(
+                                order=order,
+                                cart=hydrated_cart
                             )
 
                             # TODO: Create and link payment intent for this order
@@ -193,7 +172,6 @@ class CreateOrder(APIView):
 
 
                 else:
-                    # At this point I expect items to already have been cloned, no further action required.
 
                     return Response(
                         {
@@ -202,3 +180,66 @@ class CreateOrder(APIView):
                         },
                         status=status.HTTP_200_OK
                     )
+
+def clone_products_to_order_items(
+        order: Order,
+        cart: list[CartItem],
+        currency: str,
+    ):
+    items_to_create = [
+        OrderedItem(
+            order=order,
+            product=product['product'].barcode,
+            amount_ordered=product['amount'],
+            unit_price_at_purchase_time=product['product'].unitPrice,
+            currency=currency
+        )
+        for product in cart
+    ]
+
+    OrderedItem.objects.bulk_create(items_to_create)
+
+
+def decrease_stock_for_ordered_items( cart: list[CartItem] ) -> list[str]:
+    locked = {
+        p.barcode: p
+        for p in ProductVariant.objects
+        .select_for_update()
+        .filter(barcode__in=[
+            cart_item['product'].barcode for cart_item in cart
+        ])
+        .order_by("barcode")
+    }
+
+    insufficient: list[str] = [
+        cart_item['product'].barcode for cart_item in cart
+        if locked[cart_item['product']].stock < cart_item['amount']
+    ]
+
+    if insufficient:
+        return insufficient
+    else:
+        for cart_item in cart:
+            ProductVariant.objects.filter(
+                barcode=cart_item['product'].barcode
+            ).update(stock=F("stock") - cart_item['amount'])
+
+        return []
+
+
+def schedule_refill_stock_for_stale_orders(
+        order: Order,
+        cart: list[CartItem],
+):
+    reset_stale_cart_stock_payload = [
+        {
+            "product_barcode": product['product'].barcode,
+            "amount_ordered": product['amount'],
+        }
+        for product in cart
+    ]
+
+    reset_stale_cart_stock.apply_async(
+        args=(order.id, reset_stale_cart_stock_payload),
+        countdown=60 * 15
+    )

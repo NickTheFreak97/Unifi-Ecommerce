@@ -8,7 +8,7 @@ from django_redis import get_redis_connection
 
 
 
-class IncrementProduct(APIView):
+class RemoveProduct(APIView):
     permission_classes = [AllowAny]
 
     def perform_authentication(self, request):
