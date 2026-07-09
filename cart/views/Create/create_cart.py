@@ -5,8 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q
-
-from products.product import Product
 from .cart_item_serializer import CartItemSerializer
 from django_redis import get_redis_connection
 from cart.models import Cart
