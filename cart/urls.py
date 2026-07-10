@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from cart.views import CreateCart, IncrementProduct, DecrementProduct, RemoveProduct, GetCart
+from cart.views import CreateCart, IncrementProduct, DecrementProduct, RemoveProduct, GetCart, AddProduct
 from django.urls import path
 
 urlpatterns = [
@@ -23,4 +23,5 @@ urlpatterns = [
     path('decrement/', DecrementProduct.as_view(), name='decrement product'),
     path('remove/', RemoveProduct.as_view(), name='remove product'),
     path('fetch/', GetCart.as_view(), name='fetch cart'),
+    path('add/', AddProduct.as_view(), name='add product'),
 ]

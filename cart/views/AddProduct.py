@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -6,6 +7,7 @@ from rest_framework import status, serializers
 from django.db import transaction
 from cart.models import Cart
 from django_redis import get_redis_connection
+from catalog.models import ProductVariant
 
 
 class AddProductSerializer(serializers.Serializer):
@@ -30,10 +32,18 @@ class AddProduct(APIView):
         quantity = serializer.validated_data['quantity']
 
         if request.user.is_authenticated:
+            try:
+                product = ProductVariant.objects.get(barcode=barcode)
+            except ObjectDoesNotExist:
+                return Response(
+                    {'error': 'Product not found'},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
             with transaction.atomic():
                 existing_entry = Cart.objects.select_for_update().filter(
                     user=request.user,
-                    barcode=barcode,
+                    product=product,
                 )
                 created = False
 
@@ -42,7 +52,7 @@ class AddProduct(APIView):
                 else:
                     Cart.objects.create(
                         user=request.user,
-                        barcode=barcode,
+                        product=product,
                         quantity=quantity,
                     )
                     created = True

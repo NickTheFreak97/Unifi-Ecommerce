@@ -23,12 +23,16 @@ export default function NumberField({
   helperText = "Decimal separator is a comma (,)",
   error,
   size = 'medium',
+  onIncrement,
+  onDecrement,
   ...other
 }: BaseNumberField.Root.Props & {
   label?: React.ReactNode;
   helperText?: React.ReactNode;
   size?: 'small' | 'medium';
   error?: boolean;
+  onIncrement?: () => void;
+  onDecrement?: () => void;
 })  {
   let id = React.useId();
   if (idProp) {
@@ -86,7 +90,7 @@ export default function NumberField({
                 }}
               >
                 <BaseNumberField.Increment
-                  render={<IconButton size={size} aria-label="Increase" />}
+                  render={<IconButton size={size} aria-label="Increase" onClick={onIncrement} />}
                 >
                   <KeyboardArrowUpIcon
                     fontSize={size}
@@ -95,7 +99,7 @@ export default function NumberField({
                 </BaseNumberField.Increment>
 
                 <BaseNumberField.Decrement
-                  render={<IconButton size={size} aria-label="Decrease" />}
+                  render={<IconButton size={size} aria-label="Decrease" onClick={onDecrement} />}
                 >
                   <KeyboardArrowDownIcon
                     fontSize={size}

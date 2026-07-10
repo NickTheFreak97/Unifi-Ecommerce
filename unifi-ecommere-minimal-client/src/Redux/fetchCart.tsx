@@ -10,7 +10,7 @@ export const fetchCart = createAsyncThunk(
         try {
             const cartState = getState() as RootState
 
-            console.warn(cartState.cart.length)
+            console.warn(cartState.cart.items.length)
             const accessToken = getAccessToken();
             const response = await http.get('/cart/fetch/', {
                 headers: {

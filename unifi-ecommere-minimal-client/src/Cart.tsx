@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { Button } from '@mui/material';
 import { useSelector } from 'react-redux'
@@ -8,7 +8,6 @@ import { useAppDispatch } from './Redux/hooks'
 import { type Category } from './routes/Catalog'
 import { http } from './API/axiosHTTP'
 import NumberField from './utils/NumberField';
-import { getAccessToken } from './context/AuthContext';
 import { addProductToCart } from './Redux/addProductToCart';
 
 interface ProductEntry {
@@ -17,6 +16,12 @@ interface ProductEntry {
     name: string;
     unit_price: number;
     stock: number;
+    quantity: number;
+}
+
+interface CartProps {
+    didLoad: boolean;
+    error: any
 }
 
 const staticColumns: GridColDef<ProductEntry>[] = [
@@ -51,10 +56,12 @@ const staticColumns: GridColDef<ProductEntry>[] = [
 
 const Cart: React.FC = () => {
 
-    const cart = useSelector((state: RootState) => state.cart)
+    const cart = useSelector((state: RootState) => state.cart.items)
     const [catalog, setCatalog] = useState<Category[]>([])
     const [quantities, setQuantities] = useState<Record<string, number>>({})
     const reduxDispatch = useAppDispatch()
+    const didLoad = useSelector((state: RootState) => state.cart.didLoad)
+    const didFetch = useRef(false)
 
     const handleQuantityChange = useCallback((productId: string, value: number | null) => {
         setQuantities(prev => ({
@@ -63,10 +70,14 @@ const Cart: React.FC = () => {
         }))
     }, [])
 
+    useEffect(() => {
+        console.log(quantities)
+    }, [quantities])
+
     const handleAdd = useCallback(async (product: ProductEntry) => {
         const quantity = quantities[product.barcode]
 
-        if ( !!quantity ) {
+        if (quantity) {
             reduxDispatch(
                 addProductToCart({
                     "barcode": product.barcode,
@@ -77,6 +88,45 @@ const Cart: React.FC = () => {
             console.warn(`Attempted to add product ${product.barcode} - ${product.name} but associated ordered quantity is 0 | undefined | null`)
         }
     }, [quantities, reduxDispatch])
+
+    const handleIncrementQuantity = useCallback(async (product: ProductEntry) => {
+
+    }, [quantities, reduxDispatch])
+
+    const fetchCatalog = useCallback(async () => {
+        await http.get('/staff/products/fetch_catalog/')
+            .then(response => {
+                setCatalog(response.data.catalog)
+            })
+            .catch(
+                error => {
+                    console.error(error)
+                }
+            )
+    }, [setCatalog])
+
+    useEffect(() => {
+        if (didLoad) {
+            setQuantities(
+                cart.reduce((partial_cart, item) => {
+                    partial_cart[item.barcode] = item.amount
+                    return partial_cart
+                }, {} as Record<string, number>)
+            )
+        }
+    }, [didLoad, cart])
+
+    useEffect(() => {
+        fetchCatalog()
+    }, [])
+
+    useEffect(() => {
+        if (!didLoad && !didFetch.current) {
+            didFetch.current = true
+            reduxDispatch(fetchCart())
+        }
+    }, [])
+
 
     const columns: GridColDef<ProductEntry>[] = [
         ...staticColumns,
@@ -89,9 +139,12 @@ const Cart: React.FC = () => {
             filterable: false,
             renderCell: (params) => (
                 <NumberField
-                    value={quantities[params.row.id] ?? 0}
+                    value={params.row.quantity}
                     onValueChange={(value) => handleQuantityChange(params.row.id, value)}
                     min={0}
+                    onIncrement={
+
+                    }
                     helperText={null}
                     size="small"
                 />
@@ -117,26 +170,6 @@ const Cart: React.FC = () => {
         },
     ]
 
-    const fetchCatalog = useCallback(async () => {
-        await http.get('/staff/products/fetch_catalog/')
-            .then(response => {
-                setCatalog(response.data.catalog)
-            })
-            .catch(
-                error => {
-                    console.error(error)
-                }
-            )
-    }, [setCatalog])
-
-    useEffect(() => {
-        fetchCatalog()
-    }, [])
-
-    useEffect(() => {
-        reduxDispatch(fetchCart())
-    }, [])
-
 
     return (
         <main>
@@ -151,7 +184,8 @@ const Cart: React.FC = () => {
                                     barcode: product.barcode,
                                     name: product.name,
                                     stock: product["product_variants"][0].stock,
-                                    unit_price: product["product_variants"][0].unit_price
+                                    unit_price: product["product_variants"][0].unit_price,
+                                    quantity: quantities[product.barcode] ?? 0,
                                 }
                             }
                         )

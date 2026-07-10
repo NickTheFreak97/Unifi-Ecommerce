@@ -17,7 +17,7 @@ export const addProductToCart = createAsyncThunk(
         const cartState = getState() as RootState
 
         try {
-            if (cartState.cart.length <= 0) {
+            if (cartState.cart.items.length <= 0) {
                 const cartCreationResponse = await http.post('/cart/create/',
                     { 'cart': [ product ] },
                     {
@@ -33,9 +33,12 @@ export const addProductToCart = createAsyncThunk(
                     quantity: product.amount
                 }
             } else {
-                const response = await http.post(
+                const response = await http.put(
                     '/cart/add/',
-                    product,
+                    {
+                        "barcode": product.barcode,
+                        "quantity": product.amount
+                    },
                     {
                         headers: {
                             Authorization: accessToken ? `Bearer ${accessToken}` : undefined

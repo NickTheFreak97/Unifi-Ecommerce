@@ -7,9 +7,17 @@ export interface CartItem {
     amount: number
 }
 
-export type CartState = CartItem[]
+export interface CartState {
+    items: CartItem[]
+    didLoad: boolean
+    error: any
+}
 
-const initialState: CartState = []
+const initialState: CartState = {
+    items: [],
+    didLoad: false,
+    error: null,
+}
 
 const cartSlice = createSlice({
     name: 'cart',
@@ -18,7 +26,7 @@ const cartSlice = createSlice({
         increment: (state, action: PayloadAction<{ barcode: string; amount?: number }>) => {
             const { barcode, amount = 1 } = action.payload
 
-            const product = state.find(
+            const product = state.items.find(
                 item => item.barcode === barcode
             )
 
@@ -32,7 +40,7 @@ const cartSlice = createSlice({
         decrement: (state, action: PayloadAction<{ barcode: string; amount?: number }>) => {
             const { barcode, amount = 1 } = action.payload
 
-            const productIndex = state.findIndex(
+            const productIndex = state.items.findIndex(
                 item => item.barcode === barcode
             )
 
@@ -41,22 +49,22 @@ const cartSlice = createSlice({
                 return
             }
 
-            const product = state[productIndex]
+            const product = state.items[productIndex]
 
             if (amount >= product.amount) {
-                state.splice(productIndex, 1)
+                state.items.splice(productIndex, 1)
             } else {
                 product.amount -= amount
             }
         },
 
         remove: (state, action: PayloadAction<{ barcode: string }>) => {
-            const index = state.findIndex(
+            const index = state.items.findIndex(
                 item => item.barcode === action.payload.barcode
             )
 
             if (index !== -1) {
-                state.splice(index, 1)
+                state.items.splice(index, 1)
             } else {
                 console.error(
                     `Product with barcode ${action.payload.barcode} not found in cart.`
@@ -67,41 +75,43 @@ const cartSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
-            .addCase(fetchCart.pending, (state, action) => {
-
+            .addCase(fetchCart.pending, (state) => {
+                state.error = null
             })
             .addCase(fetchCart.fulfilled, (state, action) => {
-                
+                state.items = action.payload.cart.map(
+                    item => ({
+                        barcode: item.barcode,
+                        amount: item.quantity
+                    })
+                )
+                state.didLoad = true
+                state.error = null
             })
             .addCase(fetchCart.rejected, (state, action) => {
-                if (action.payload) {
-                    // TODO: handle server structured error
-                } else {
-                    // TODO: handle other errors (network, etc)
-                }
+                state.didLoad = true
+                state.error = action.payload ?? action.error
             });
 
-        builder 
-            .addCase(addProductToCart.pending, (state, action) => { })
-            .addCase(addProductToCart.fulfilled, (state, action) => { 
+        builder
+            .addCase(addProductToCart.pending, (state) => {
+                state.error = null
+            })
+            .addCase(addProductToCart.fulfilled, (state, action) => {
                 const { barcode, quantity = 1 } = action.payload
 
-                const product = state.find(
+                const product = state.items.find(
                     item => item.barcode === barcode
                 )
 
                 if (product) {
                     product.amount += quantity
                 } else {
-                    state.push({ barcode, amount: quantity })
+                    state.items.push({ barcode, amount: quantity })
                 }
             })
-            .addCase(addProductToCart.rejected, (state, action) => { 
-                if (action.payload) {
-                    // TODO: handle server structured error
-                } else {
-                    // TODO: handle other errors (network, etc)
-                }
+            .addCase(addProductToCart.rejected, (state, action) => {
+                state.error = action.payload ?? action.error
             })
     }
 })

@@ -35,7 +35,7 @@ class CreateCart(APIView):
                     amount = cart_item['amount']
 
                     product_in_cart_model = Cart.objects.select_for_update().filter(
-                        Q('product__eq', product) & Q('user__eq', request.user)
+                        Q(product=product) & Q(user=request.user)
                     )
 
                     if product_in_cart_model is not None:
