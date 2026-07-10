@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
+import { Button } from '@mui/material';
 import { useSelector } from 'react-redux'
 import { fetchCart } from './Redux/fetchCart'
 import { type RootState } from './Redux/store'
@@ -7,8 +8,8 @@ import { useAppDispatch } from './Redux/hooks'
 import { type Category } from './routes/Catalog'
 import { http } from './API/axiosHTTP'
 import NumberField from './utils/NumberField';
-import { Button } from '@mui/material';
 import { getAccessToken } from './context/AuthContext';
+import { addProductToCart } from './Redux/addProductToCart';
 
 interface ProductEntry {
     id: string;
@@ -63,7 +64,18 @@ const Cart: React.FC = () => {
     }, [])
 
     const handleAdd = useCallback(async (product: ProductEntry) => {
-        // TODO: Handle tap on add to cart
+        const quantity = quantities[product.barcode]
+
+        if ( !!quantity ) {
+            reduxDispatch(
+                addProductToCart({
+                    "barcode": product.barcode,
+                    "amount": quantities[product.barcode] ?? 0
+                })
+            )
+        } else {
+            console.warn(`Attempted to add product ${product.barcode} - ${product.name} but associated ordered quantity is 0 | undefined | null`)
+        }
     }, [quantities, reduxDispatch])
 
     const columns: GridColDef<ProductEntry>[] = [
@@ -165,27 +177,6 @@ const Cart: React.FC = () => {
                     }
                 )
             }
-            <Button 
-            onClick={async () => {
-                await http.post('/cart/create/', null, {
-                    headers: {
-                        Authorization: `Bearer ${getAccessToken()}`
-                    }
-                })
-                .then(
-                    (response) => {
-                        console.log(response.data)
-                    }
-                )
-                .catch(
-                    error => {
-                        console.error(error)
-                    }
-                )
-            }}
-            variant='contained' fullWidth>
-                Action
-            </Button>
         </main>
     )
 }

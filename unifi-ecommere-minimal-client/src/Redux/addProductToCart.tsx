@@ -4,9 +4,9 @@ import { http } from '../API/axiosHTTP';
 import { getAccessToken } from '../context/AuthContext';
 import { type RootState } from './store';
 
-interface AddProductPayload {
+export interface AddProductPayload {
     barcode: string;
-    quantity: number;
+    amount: number;
 }
 
 
@@ -18,25 +18,38 @@ export const addProductToCart = createAsyncThunk(
 
         try {
             if (cartState.cart.length <= 0) {
-                // TODO: Cart needs to be created 
-            }
-
-            const response = await http.post(
-                '/cart/add/', 
-                product, 
-                {
-                    headers: {
-                        Authorization: ( !!accessToken ) ? `Bearer ${getAccessToken()}` : undefined
+                const cartCreationResponse = await http.post('/cart/create/',
+                    { 'cart': [ product ] },
+                    {
+                        headers: {
+                            Authorization: accessToken ? `Bearer ${accessToken}` : undefined
+                        }
                     }
-                }
-            );
+                );
 
-            return {
-                "barcode": product.barcode,
-                "quantity": response.status === 200 ? 0 : product.quantity
+                console.log(`Cart ${cartCreationResponse.data.status == 200 ? "existed" : "created"}`)
+                return {
+                    barcode: product.barcode,
+                    quantity: product.amount
+                }
+            } else {
+                const response = await http.post(
+                    '/cart/add/',
+                    product,
+                    {
+                        headers: {
+                            Authorization: accessToken ? `Bearer ${accessToken}` : undefined
+                        }
+                    }
+                );
+
+                return {
+                    barcode: product.barcode,
+                    quantity: response.status === 200 ? 0 : product.amount
+                };
             }
-        } catch (error) {
-            return rejectWithValue(error.response.data);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data);
         }
     }
 );
