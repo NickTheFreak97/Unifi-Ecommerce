@@ -9,6 +9,8 @@ import { type Category } from './routes/Catalog'
 import { http } from './API/axiosHTTP'
 import NumberField from './utils/NumberField';
 import { addProductToCart } from './Redux/addProductToCart';
+import { incrementProductInCart } from './Redux/incrementProductInCart';
+import { useAuth } from './context/AuthContext';
 
 interface ProductEntry {
     id: string;
@@ -17,6 +19,7 @@ interface ProductEntry {
     unit_price: number;
     stock: number;
     quantity: number;
+    inCart: boolean;
 }
 
 interface CartProps {
@@ -55,24 +58,21 @@ const staticColumns: GridColDef<ProductEntry>[] = [
 ];
 
 const Cart: React.FC = () => {
-
     const cart = useSelector((state: RootState) => state.cart.items)
     const [catalog, setCatalog] = useState<Category[]>([])
     const [quantities, setQuantities] = useState<Record<string, number>>({})
     const reduxDispatch = useAppDispatch()
     const didLoad = useSelector((state: RootState) => state.cart.didLoad)
     const didFetch = useRef(false)
+    const authService = useAuth()
 
-    const handleQuantityChange = useCallback((productId: string, value: number | null) => {
+
+    const handleQuantityChange = useCallback((barcode: string, value: number | null) => {
         setQuantities(prev => ({
             ...prev,
-            [productId]: value ?? 0
+            [barcode]: value ?? 0
         }))
     }, [])
-
-    useEffect(() => {
-        console.log(quantities)
-    }, [quantities])
 
     const handleAdd = useCallback(async (product: ProductEntry) => {
         const quantity = quantities[product.barcode]
@@ -81,7 +81,7 @@ const Cart: React.FC = () => {
             reduxDispatch(
                 addProductToCart({
                     "barcode": product.barcode,
-                    "amount": quantities[product.barcode] ?? 0
+                    "quantity": quantity
                 })
             )
         } else {
@@ -89,9 +89,15 @@ const Cart: React.FC = () => {
         }
     }, [quantities, reduxDispatch])
 
-    const handleIncrementQuantity = useCallback(async (product: ProductEntry) => {
-
-    }, [quantities, reduxDispatch])
+    
+    const handleIncrementQuantity = useCallback((product: ProductEntry) => {
+        reduxDispatch(
+            incrementProductInCart({
+                "barcode": product.barcode,
+                "quantity": 1
+            })
+        )
+    }, [reduxDispatch])
 
     const fetchCatalog = useCallback(async () => {
         await http.get('/staff/products/fetch_catalog/')
@@ -106,26 +112,17 @@ const Cart: React.FC = () => {
     }, [setCatalog])
 
     useEffect(() => {
-        if (didLoad) {
-            setQuantities(
-                cart.reduce((partial_cart, item) => {
-                    partial_cart[item.barcode] = item.amount
-                    return partial_cart
-                }, {} as Record<string, number>)
-            )
-        }
-    }, [didLoad, cart])
-
-    useEffect(() => {
         fetchCatalog()
     }, [])
 
     useEffect(() => {
-        if (!didLoad && !didFetch.current) {
-            didFetch.current = true
-            reduxDispatch(fetchCart())
+        if (authService.isInitialized) {
+            if (!didLoad && !didFetch.current) {
+                didFetch.current = true
+                reduxDispatch(fetchCart())
+            }
         }
-    }, [])
+    }, [authService.isInitialized])
 
 
     const columns: GridColDef<ProductEntry>[] = [
@@ -139,14 +136,12 @@ const Cart: React.FC = () => {
             filterable: false,
             renderCell: (params) => (
                 <NumberField
-                    value={params.row.quantity}
-                    onValueChange={(value) => handleQuantityChange(params.row.id, value)}
+                    value={quantities[params.row.barcode] ?? 0}
+                    onValueChange={(value) => handleQuantityChange(params.row.barcode, value)}
                     min={0}
-                    onIncrement={
-
-                    }
                     helperText={null}
                     size="small"
+                    disabled={params.row.inCart}
                 />
             ),
         },
@@ -161,7 +156,7 @@ const Cart: React.FC = () => {
                 <Button
                     variant="contained"
                     size="small"
-                    disabled={false}
+                    disabled={params.row.inCart || !quantities[params.row.barcode]}
                     onClick={() => handleAdd(params.row)}
                 >
                     Add
@@ -185,7 +180,8 @@ const Cart: React.FC = () => {
                                     name: product.name,
                                     stock: product["product_variants"][0].stock,
                                     unit_price: product["product_variants"][0].unit_price,
-                                    quantity: quantities[product.barcode] ?? 0,
+                                    quantity: cart.find(item => item.barcode === product.barcode)?.quantity ?? 0,
+                                    inCart: cart.some(item => item.barcode === product.barcode),
                                 }
                             }
                         )
@@ -197,6 +193,13 @@ const Cart: React.FC = () => {
                                     key={category.name}
                                     rows={products_for_this_category}
                                     columns={columns}
+                                    getRowClassName={(params) => params.row.inCart ? 'row--in-cart' : ''}
+                                    sx={{
+                                        '& .row--in-cart': {
+                                            opacity: 0.5,
+                                            pointerEvents: 'none',
+                                        },
+                                    }}
                                     initialState={{
                                         pagination: {
                                             paginationModel: {

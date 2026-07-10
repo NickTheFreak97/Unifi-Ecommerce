@@ -1,10 +1,11 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { fetchCart } from '../fetchCart'
 import { addProductToCart } from '../addProductToCart'
+import { incrementProductInCart } from '../incrementProductInCart'
 
 export interface CartItem {
     barcode: string
-    amount: number
+    quantity: number
 }
 
 export interface CartState {
@@ -23,22 +24,8 @@ const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        increment: (state, action: PayloadAction<{ barcode: string; amount?: number }>) => {
-            const { barcode, amount = 1 } = action.payload
-
-            const product = state.items.find(
-                item => item.barcode === barcode
-            )
-
-            if (product) {
-                product.amount += amount
-            } else {
-                console.error(`Product with barcode ${barcode} not found in cart.`)
-            }
-        },
-
-        decrement: (state, action: PayloadAction<{ barcode: string; amount?: number }>) => {
-            const { barcode, amount = 1 } = action.payload
+        decrement: (state, action: PayloadAction<{ barcode: string; quantity?: number }>) => {
+            const { barcode, quantity = 1 } = action.payload
 
             const productIndex = state.items.findIndex(
                 item => item.barcode === barcode
@@ -51,10 +38,10 @@ const cartSlice = createSlice({
 
             const product = state.items[productIndex]
 
-            if (amount >= product.amount) {
+            if (quantity >= product.quantity) {
                 state.items.splice(productIndex, 1)
             } else {
-                product.amount -= amount
+                product.quantity -= quantity
             }
         },
 
@@ -82,7 +69,7 @@ const cartSlice = createSlice({
                 state.items = action.payload.cart.map(
                     item => ({
                         barcode: item.barcode,
-                        amount: item.quantity
+                        quantity: item.quantity
                     })
                 )
                 state.didLoad = true
@@ -105,16 +92,36 @@ const cartSlice = createSlice({
                 )
 
                 if (product) {
-                    product.amount += quantity
+                    product.quantity += quantity
                 } else {
-                    state.items.push({ barcode, amount: quantity })
+                    state.items.push({ barcode, quantity: quantity })
                 }
             })
             .addCase(addProductToCart.rejected, (state, action) => {
                 state.error = action.payload ?? action.error
             })
+
+            builder.addCase(incrementProductInCart.pending, (state) => {
+                state.error = null
+            })
+            .addCase(incrementProductInCart.fulfilled, (state, action) => {
+                 const { barcode, quantity = 1 } = action.payload
+
+                const product = state.items.find(
+                    item => item.barcode === barcode
+                )
+
+                if (product) {
+                    product.quantity += quantity
+                } else {
+                    console.error(`Product with barcode ${barcode} not found in cart.`)
+                }
+            })
+            .addCase(incrementProductInCart.rejected, (state, action) => {
+                state.error = action.payload ?? action.error
+            })
     }
 })
 
-export const { increment, decrement, remove } = cartSlice.actions
+export const { decrement, remove } = cartSlice.actions
 export default cartSlice.reducer

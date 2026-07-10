@@ -35,7 +35,7 @@ class DecrementProduct(APIView):
             )
 
             if product_to_update.exists():
-                product_to_update.update(amount = F("amount") + quantity)
+                product_to_update.update(quantity= F('quantity') - quantity)
                 return Response(status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response(status=status.HTTP_404_NOT_FOUND)

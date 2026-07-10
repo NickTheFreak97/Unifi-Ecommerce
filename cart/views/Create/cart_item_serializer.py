@@ -6,5 +6,5 @@ class CartItemSerializer(serializers.Serializer):
         slug_field="barcode",
         queryset=ProductVariant.objects.all()
     )
-    amount = serializers.IntegerField(min_value=0)
+    quantity = serializers.IntegerField(min_value=0)
 

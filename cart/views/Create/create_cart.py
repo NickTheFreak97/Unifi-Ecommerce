@@ -32,20 +32,20 @@ class CreateCart(APIView):
             with transaction.atomic():
                 for cart_item in validated_cart:
                     product = cart_item['barcode']
-                    amount = cart_item['amount']
+                    quantity= cart_item['quantity']
 
                     product_in_cart_model = Cart.objects.select_for_update().filter(
                         Q(product=product) & Q(user=request.user)
                     )
 
                     if product_in_cart_model is not None:
-                        product_in_cart_model.update(amount=amount)
+                        product_in_cart_model.update(quantity=quantity)
                         updated.append(product.barcode)
                     else:
                         Cart.objects.create(
                             user=request.user,
                             product=product,
-                            amount=amount
+                            quantity=quantity
                         )
 
                         added.append(product.barcode)
@@ -67,17 +67,17 @@ class CreateCart(APIView):
 
                     for cart_item in validated_cart:
                         barcode = cart_item['barcode'].barcode
-                        amount = cart_item['amount']
+                        quantity= cart_item['quantity']
 
-                        if barcode is None or amount is None:
+                        if barcode is None or quantity is None:
                             print("Bad format")
                             return Response(status=status.HTTP_400_BAD_REQUEST)
                         else:
                             if redis.hexists(key_for_this_user, barcode):
-                                redis.hset(key_for_this_user, barcode, amount)
+                                redis.hset(key_for_this_user, barcode, quantity)
                                 updated.append(barcode)
                             else:
-                                redis.hset(key_for_this_user, barcode, amount)
+                                redis.hset(key_for_this_user, barcode,quantity)
                                 added.append(barcode)
 
                     redis.expire(key_for_this_user, 60 * 60 * 24)
@@ -87,7 +87,7 @@ class CreateCart(APIView):
                     }, status=status.HTTP_200_OK)
                 else:
                     mapping = {
-                        cart_item['barcode'].barcode: cart_item['amount']
+                        cart_item['barcode'].barcode: cart_item['quantity']
                         for cart_item in validated_cart
                     }
 

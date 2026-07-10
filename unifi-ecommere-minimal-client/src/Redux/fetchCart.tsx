@@ -6,17 +6,17 @@ import type { RootState } from "./store";
 
 export const fetchCart = createAsyncThunk(
     'cart/fetch',
-    async (_, { rejectWithValue, getState }) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const cartState = getState() as RootState
-
-            console.warn(cartState.cart.items.length)
             const accessToken = getAccessToken();
+
             const response = await http.get('/cart/fetch/', {
                 headers: {
                     Authorization: !!accessToken ? `Bearer ${accessToken}` : undefined
-                }
+                },
+                withCredentials: true
             });
+
             return response.data;
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {

@@ -34,7 +34,7 @@ class IncrementProduct(APIView):
             with transaction.atomic():
                 product_to_update = Cart.objects.select_for_update().filter(
                     user=request.user,
-                    product=product,
+                    product__barcode=product,
                 )
 
                 if product_to_update.exists():

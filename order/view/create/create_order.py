@@ -19,7 +19,7 @@ from typing import TypedDict
 
 class CartItem(TypedDict):
     product: ProductVariant
-    amount: int
+    quantity: int
 
 
 # TODO: Could consider letting the client generate an idempotency key and optionally attach it to the request body.
@@ -131,7 +131,7 @@ class CreateOrder(APIView):
                             hydrated_cart = [
                                 CartItem(
                                     product=product,
-                                    amount=cart_barcodes_to_ordered_amount_map[product.barcode]
+                                    quantity=cart_barcodes_to_ordered_amount_map[product.barcode]
                                 )
 
                                 for product in products_to_clone_query
@@ -190,7 +190,7 @@ def clone_products_to_order_items(
         OrderedItem(
             order=order,
             product=product['product'].barcode,
-            amount_ordered=product['amount'],
+            amount_ordered=product['quantity'],
             unit_price_at_purchase_time=product['product'].unitPrice,
             currency=currency
         )
@@ -213,7 +213,7 @@ def decrease_stock_for_ordered_items( cart: list[CartItem] ) -> list[str]:
 
     insufficient: list[str] = [
         cart_item['product'].barcode for cart_item in cart
-        if locked[cart_item['product']].stock < cart_item['amount']
+        if locked[cart_item['product']].stock < cart_item['quantity']
     ]
 
     if insufficient:
@@ -222,7 +222,7 @@ def decrease_stock_for_ordered_items( cart: list[CartItem] ) -> list[str]:
         for cart_item in cart:
             ProductVariant.objects.filter(
                 barcode=cart_item['product'].barcode
-            ).update(stock=F("stock") - cart_item['amount'])
+            ).update(stock=F("stock") - cart_item['quantity'])
 
         return []
 
@@ -234,7 +234,7 @@ def schedule_refill_stock_for_stale_orders(
     reset_stale_cart_stock_payload = [
         {
             "product_barcode": product['product'].barcode,
-            "amount_ordered": product['amount'],
+            "amount_ordered": product['quantity'],
         }
         for product in cart
     ]

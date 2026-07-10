@@ -86,7 +86,7 @@ class CreateOrderFromCart(APIView):
                         cart = [
                                 CartItem(
                                     product=cart_item.product,
-                                    amount=cart_item.quantity
+                                    quantity=cart_item.quantity
                                 )
                                 for cart_item in cart_for_this_user
                             ]
@@ -100,8 +100,8 @@ class CreateOrderFromCart(APIView):
 
                         if cart_mapping_hash:
                             cart_mapping = {
-                                barcode.decode(): int(amount)
-                                for barcode, amount in cart_mapping_hash.items()
+                                barcode.decode(): quantity
+                                for barcode,quantity in cart_mapping_hash.items()
                             }
 
                             products_in_cart = ProductVariant.objects.filter(
@@ -111,7 +111,7 @@ class CreateOrderFromCart(APIView):
                             cart = [
                                 CartItem(
                                     product=product,
-                                    amount=cart_mapping[product.barcode]
+                                    quantity=cart_mapping[product.barcode]
                                 )
                                 for product in products_in_cart
                             ]
@@ -128,7 +128,7 @@ class CreateOrderFromCart(APIView):
                         order = Order.objects.create(
                             user=request.user if request.user.is_authenticated else None,
                             email=serializer.validated_data['email'],
-                            price=sum(item['product'].unitPrice * item['amount'] for item in cart),
+                            price=sum(item['product'].unitPrice * item['quantity'] for item in cart),
                             currency=serializer.validated_data['currency'],
                             shipping_street=serializer.validated_data['shipping_street'],
                             street_zipcode=serializer.validated_data['street_zipcode'],

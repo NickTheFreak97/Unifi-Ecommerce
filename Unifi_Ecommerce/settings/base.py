@@ -53,6 +53,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "order.middleware.GuestTokenMiddleware",
+    "cart.middleware.CartMergingMiddleware"
 ]
 
 CORS_ALLOW_CREDENTIALS = True

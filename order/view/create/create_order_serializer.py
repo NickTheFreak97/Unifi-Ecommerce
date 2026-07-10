@@ -77,7 +77,7 @@ class CreateOrderSerializer(serializers.Serializer):
 
                     if insufficient_stock_items:
                         raise serializers.ValidationError({
-                            'message': "At least one of the specified order requested amounts exceeds availability in stock.",
+                            'message': "At least one of the specified order requestedquantity exceeds availability in stock.",
                             'product_barcode': insufficient_stock_items
                         })
 

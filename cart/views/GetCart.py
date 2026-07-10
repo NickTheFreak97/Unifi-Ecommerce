@@ -21,7 +21,7 @@ class GetCart(APIView):
         if request.user.is_authenticated:
             cart = Cart.objects.select_related('product').filter(user=request.user)
 
-            if cart:
+            if cart is not None:
                 cart_in_response = [
                     {
                         "barcode": cart_item.product.barcode,
@@ -37,7 +37,7 @@ class GetCart(APIView):
                     },
                     status=status.HTTP_200_OK)
             else:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return Response(status=status.HTTP_407_PROXY_AUTHENTICATION_REQUIRED)
         else:
             guest_token = request.COOKIES.get('guest_token')
 
@@ -46,8 +46,8 @@ class GetCart(APIView):
                 cart_mapping_hash = redis.hgetall(f"cart:{guest_token}")
 
                 cart_mapping = {
-                    barcode.decode(): int(amount)
-                    for barcode, amount in cart_mapping_hash.items()
+                    barcode.decode(): quantity
+                    for barcode,quantity in cart_mapping_hash.items()
                 }
 
                 cart_in_response = [
@@ -66,4 +66,4 @@ class GetCart(APIView):
                     status=status.HTTP_200_OK
                 )
             else:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+                return Response(status=status.HTTP_402_PAYMENT_REQUIRED)

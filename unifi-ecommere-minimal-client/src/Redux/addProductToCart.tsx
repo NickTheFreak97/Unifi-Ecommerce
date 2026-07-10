@@ -6,7 +6,7 @@ import { type RootState } from './store';
 
 export interface AddProductPayload {
     barcode: string;
-    amount: number;
+    quantity: number;
 }
 
 
@@ -23,32 +23,34 @@ export const addProductToCart = createAsyncThunk(
                     {
                         headers: {
                             Authorization: accessToken ? `Bearer ${accessToken}` : undefined
-                        }
+                        },
+                        withCredentials: true
                     }
                 );
 
                 console.log(`Cart ${cartCreationResponse.data.status == 200 ? "existed" : "created"}`)
                 return {
                     barcode: product.barcode,
-                    quantity: product.amount
+                    quantity: product.quantity
                 }
             } else {
                 const response = await http.put(
                     '/cart/add/',
                     {
                         "barcode": product.barcode,
-                        "quantity": product.amount
+                        "quantity": product.quantity
                     },
                     {
                         headers: {
                             Authorization: accessToken ? `Bearer ${accessToken}` : undefined
-                        }
+                        },
+                        withCredentials: true
                     }
                 );
 
                 return {
                     barcode: product.barcode,
-                    quantity: response.status === 200 ? 0 : product.amount
+                    quantity: response.status === 200 ? 0 : product.quantity
                 };
             }
         } catch (error: any) {
