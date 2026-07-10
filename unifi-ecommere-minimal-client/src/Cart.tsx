@@ -166,8 +166,70 @@ const Cart: React.FC = () => {
     ]
 
 
+    const cartRows = cart.map(item => {
+    let name = ''
+    for (const category of catalog) {
+        const product = category.products.find(p => p.barcode === item.barcode)
+        if (product) {
+            name = product.name
+            break
+        }
+    }
+    return {
+        id: item.barcode,
+        barcode: item.barcode,
+        name,
+        quantity: item.quantity,
+    }
+})
+
+const cartColumns: GridColDef[] = [
+    { field: "barcode", headerName: "Barcode", flex: 2, minWidth: 180 },
+    { field: "name", headerName: "Name", flex: 3, minWidth: 250 },
+    {
+        field: "quantity",
+        headerName: "Quantity",
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+        filterable: false,
+        renderCell: (params) => (
+            <NumberField
+                value={params.row.quantity}
+                min={1}
+                onIncrement={() => { handleIncrementQuantity(params.row) }}
+                helperText={null}
+                size="small"
+            />
+        ),
+    },
+    {
+        field: "actions",
+        headerName: "",
+        flex: 0.8,
+        minWidth: 100,
+        sortable: false,
+        filterable: false,
+        renderCell: (params) => (
+            <Button
+                variant="contained"
+                color="error"
+                size="small"
+                onClick={() => {}}
+            >
+                Remove
+            </Button>
+        ),
+    },
+]
+
+
+
     return (
         <main>
+            <h1>Test Cart endpoints</h1>
+            <section>
+            <h2>Catalog</h2>
             {
                 (catalog.length > 0) &&
                 catalog.map(
@@ -188,7 +250,7 @@ const Cart: React.FC = () => {
 
                         return (
                             <React.Fragment key={category.name}>
-                                <h2>{ category.name } </h2>
+                                <h3>{ category.name } </h3>
                                 <DataGrid
                                     key={category.name}
                                     rows={products_for_this_category}
@@ -214,6 +276,26 @@ const Cart: React.FC = () => {
                     }
                 )
             }
+            </section>
+
+            <section>
+                <h2>Cart</h2>
+                {cart.length > 0 ? (
+                <DataGrid
+                    rows={cartRows}
+                    columns={cartColumns}
+                    rowSelection={false}
+                    initialState={{
+                        pagination: {
+                            paginationModel: { pageSize: 5 },
+                        },
+                    }}
+                    pageSizeOptions={[5]}
+                />
+            ) : (
+                <p>Cart is empty</p>
+            )}
+            </section>
         </main>
     )
 }

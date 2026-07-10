@@ -30,6 +30,8 @@ class CartMergingMiddleware:
     def __call__(self, request):
         guest_token = request.COOKIES.get('guest_token')
 
+        print(f"user auth: {request.user.is_authenticated}, guest token: {guest_token}")
+
         if (
             request.path in self.affected_endpoints
             and guest_token is not None

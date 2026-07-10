@@ -25,6 +25,8 @@ class CreateCart(APIView):
 
         validated_cart = serializer.validated_data
 
+        print(f"User authenticated: {request.user.is_authenticated}, guest_token: {request.COOKIES.get('guest_token')}")
+
         if request.user.is_authenticated:
             added = []
             updated = []
@@ -38,7 +40,7 @@ class CreateCart(APIView):
                         Q(product=product) & Q(user=request.user)
                     )
 
-                    if product_in_cart_model is not None:
+                    if product_in_cart_model.exists():
                         product_in_cart_model.update(quantity=quantity)
                         updated.append(product.barcode)
                     else:
@@ -47,7 +49,6 @@ class CreateCart(APIView):
                             product=product,
                             quantity=quantity
                         )
-
                         added.append(product.barcode)
 
 
