@@ -8,7 +8,6 @@ from cart.models import Cart
 from django_redis import get_redis_connection
 
 
-
 class AddProductSerializer(serializers.Serializer):
     barcode = serializers.CharField()
     quantity = serializers.IntegerField(min_value=1)

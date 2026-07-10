@@ -62,6 +62,10 @@ const Cart: React.FC = () => {
         }))
     }, [])
 
+    const handleAdd = useCallback(async (product: ProductEntry) => {
+        // TODO: Handle tap on add to cart
+    }, [quantities, reduxDispatch])
+
     const columns: GridColDef<ProductEntry>[] = [
         ...staticColumns,
         {
@@ -80,7 +84,25 @@ const Cart: React.FC = () => {
                     size="small"
                 />
             ),
-        }
+        },
+        {
+            field: "actions",
+            headerName: "",
+            flex: 0.8,
+            minWidth: 100,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <Button
+                    variant="contained"
+                    size="small"
+                    disabled={false}
+                    onClick={() => handleAdd(params.row)}
+                >
+                    Add
+                </Button>
+            ),
+        },
     ]
 
     const fetchCatalog = useCallback(async () => {
@@ -161,8 +183,6 @@ const Cart: React.FC = () => {
                     }
                 )
             }}
-
-
             variant='contained' fullWidth>
                 Action
             </Button>

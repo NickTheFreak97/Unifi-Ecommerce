@@ -1,18 +1,15 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { fetchCart } from '../fetchCart'
+import { addProductToCart } from '../addProductToCart'
 
-interface CartItem {
+export interface CartItem {
     barcode: string
     amount: number
 }
 
-interface CartState {
-    items: CartItem[]
-}
+export type CartState = CartItem[]
 
-const initialState: CartState = {
-    items: []
-}
+const initialState: CartState = []
 
 const cartSlice = createSlice({
     name: 'cart',
@@ -21,7 +18,7 @@ const cartSlice = createSlice({
         increment: (state, action: PayloadAction<{ barcode: string; amount?: number }>) => {
             const { barcode, amount = 1 } = action.payload
 
-            const product = state.items.find(
+            const product = state.find(
                 item => item.barcode === barcode
             )
 
@@ -35,7 +32,7 @@ const cartSlice = createSlice({
         decrement: (state, action: PayloadAction<{ barcode: string; amount?: number }>) => {
             const { barcode, amount = 1 } = action.payload
 
-            const productIndex = state.items.findIndex(
+            const productIndex = state.findIndex(
                 item => item.barcode === barcode
             )
 
@@ -44,36 +41,22 @@ const cartSlice = createSlice({
                 return
             }
 
-            const product = state.items[productIndex]
+            const product = state[productIndex]
 
             if (amount >= product.amount) {
-                state.items.splice(productIndex, 1)
+                state.splice(productIndex, 1)
             } else {
                 product.amount -= amount
             }
         },
 
-        add: (state, action: PayloadAction<{ barcode: string; amount?: number }>) => {
-            const { barcode, amount = 1 } = action.payload
-
-            const product = state.items.find(
-                item => item.barcode === barcode
-            )
-
-            if (product) {
-                product.amount += amount
-            } else {
-                state.items.push({ barcode, amount })
-            }
-        },
-
         remove: (state, action: PayloadAction<{ barcode: string }>) => {
-            const index = state.items.findIndex(
+            const index = state.findIndex(
                 item => item.barcode === action.payload.barcode
             )
 
             if (index !== -1) {
-                state.items.splice(index, 1)
+                state.splice(index, 1)
             } else {
                 console.error(
                     `Product with barcode ${action.payload.barcode} not found in cart.`
@@ -88,13 +71,40 @@ const cartSlice = createSlice({
 
             })
             .addCase(fetchCart.fulfilled, (state, action) => {
-
+                
             })
             .addCase(fetchCart.rejected, (state, action) => {
-
+                if (action.payload) {
+                    // TODO: handle server structured error
+                } else {
+                    // TODO: handle other errors (network, etc)
+                }
             });
+
+        builder 
+            .addCase(addProductToCart.pending, (state, action) => { })
+            .addCase(addProductToCart.fulfilled, (state, action) => { 
+                const { barcode, quantity = 1 } = action.payload
+
+                const product = state.find(
+                    item => item.barcode === barcode
+                )
+
+                if (product) {
+                    product.amount += quantity
+                } else {
+                    state.push({ barcode, amount: quantity })
+                }
+            })
+            .addCase(addProductToCart.rejected, (state, action) => { 
+                if (action.payload) {
+                    // TODO: handle server structured error
+                } else {
+                    // TODO: handle other errors (network, etc)
+                }
+            })
     }
 })
 
-export const { increment, decrement, add, remove } = cartSlice.actions
+export const { increment, decrement, remove } = cartSlice.actions
 export default cartSlice.reducer
