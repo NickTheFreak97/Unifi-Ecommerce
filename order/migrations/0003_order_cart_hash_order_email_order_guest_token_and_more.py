@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
             CREATE OR REPLACE FUNCTION copy_email_for_authenticated_user() RETURNS TRIGGER AS $$
             BEGIN
                 IF NEW.user_id IS NOT NULL THEN
-                    SELECT email INTO NEW.email FROM auth_user WHERE id = NEW.user_id;
+                    SELECT email INTO NEW.email FROM users_user WHERE id = NEW.user_id;
                 END IF;
                 RETURN NEW;
             END;

@@ -61,7 +61,7 @@ class UpdateOrder(APIView):
         with transaction.atomic():
             order.email = validated_data['email']
             order.shipping_street = validated_data['shipping_street']
-            order.zipcode = validated_data['street_zipcode']
+            order.zipcode = validated_data['shipping_zipcode']
             order.shipping_municipality = validated_data['shipping_municipality']
             order.shipping_country = validated_data['shipping_country']
             order.save()

@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Button, Box, MenuItem, InputLabel, Stack, Select, TextField, FormGroup } from '@mui/material'
+import { getAccessToken } from '../context/AuthContext'
+import { http } from '../API/axiosHTTP'
 
 interface OrderDetailPageProps {
     onSubmit: (
@@ -8,7 +10,7 @@ interface OrderDetailPageProps {
     ) => void
 }
 
-interface OrderDetailProps {
+export interface OrderDetailProps {
     email: string,
     street: string,
     zipcode: string,
@@ -16,6 +18,8 @@ interface OrderDetailProps {
     country: string,
     currency: string
 }
+
+
 
 const OrderDetail: React.FC<OrderDetailPageProps> = ({ onSubmit }) => {
     const [formData, setFormData] = useState<OrderDetailProps>({
@@ -27,6 +31,36 @@ const OrderDetail: React.FC<OrderDetailPageProps> = ({ onSubmit }) => {
         currency: ''
     });
 
+    const createOrUpdateorder = useCallback(async (order: OrderDetailProps, onSuccess?: (response: any) => void) => {
+        const accessToken = getAccessToken()
+
+        await http.post(
+            '/orders/create_or_update/',
+            {
+                'email': order.email,
+                'street': order.street,
+                'zipcode': order.zipcode,
+                'municipality': order.municipality,
+                'country': order.country,
+                'currency': order.currency
+            },
+            {
+                headers: {
+                    'Authorization': (!!accessToken) ? `Bearer ${accessToken}` : undefined
+                },
+                withCredentials: true
+            }
+        )
+        .then(response => {
+            if (!!onSuccess) {
+                onSuccess(response.data)
+            }
+        })
+        .catch(error => {
+            console.error(error)
+        })
+    }, [])
+
   return (
     <section>
         <h2>Order Details</h2>
@@ -35,7 +69,11 @@ const OrderDetail: React.FC<OrderDetailPageProps> = ({ onSubmit }) => {
         }} 
         onSubmit={(event: React.SubmitEvent<HTMLFormElement>) => {
             event.preventDefault();
-            onSubmit(event, formData);
+
+            createOrUpdateorder(formData, (response) => {
+                console.warn(response)
+                onSubmit(event, formData);  
+            })
         }}>
             <Stack sx={{
                 display: 'flex',

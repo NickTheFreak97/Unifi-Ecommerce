@@ -22,7 +22,7 @@ class OrderCreationSerializer(serializers.Serializer):
 class CreateOrderSerializer(serializers.Serializer):
     email = serializers.EmailField()
     street = serializers.CharField(source='shipping_street')
-    zipcode = serializers.CharField(source='street_zipcode')
+    zipcode = serializers.CharField(source='shipping_zipcode')
     municipality = serializers.CharField(source='shipping_municipality')
     country = serializers.CharField(source='shipping_country')
     cart = OrderCreationSerializer(many=True, allow_empty=False)

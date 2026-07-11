@@ -21,6 +21,8 @@ export const fetchCart = createAsyncThunk<FetchCartResult, void>(
                 withCredentials: true
             });
 
+            console.warn(response)
+
             return response.data;
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
@@ -32,6 +34,7 @@ export const fetchCart = createAsyncThunk<FetchCartResult, void>(
                     return rejectWithValue(err.response.data)
                 }
             } else {
+                console.info(err)
                 throw err
             }
         }

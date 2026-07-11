@@ -1,10 +1,11 @@
 from datetime import timedelta
 from django.db import transaction
-from django.db.models import Q, F, QuerySet
+from django.db.models import Q, F
 from django.utils import timezone
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework import status
+from django.conf import settings
 from rest_framework.response import Response
 import os
 
@@ -99,7 +100,10 @@ class CreateOrder(APIView):
                 if not candidate_duplicate:
                     cart_barcodes = { cart_item.get('product').barcode for cart_item in cart }
                     products_for_barcodes = ProductVariant.objects.filter(barcode__in=cart_barcodes)
-                    cart_barcodes_to_ordered_amount_map = { cart_item.get('product').barcode : cart_item.get("order_amount") for cart_item in cart }
+                    cart_barcodes_to_ordered_amount_map = {
+                        cart_item.get('product').barcode: cart_item.get("amount_ordered")
+                        for cart_item in cart
+                    }
 
                     if not products_for_barcodes:
                         return Response(
@@ -115,10 +119,10 @@ class CreateOrder(APIView):
                                 email=serializer.validated_data['email'],
                                 price=sum(item['product'].unitPrice * item['amount_ordered'] for item in cart),
                                 currency=serializer.validated_data['currency'],
-                                shipping_street=serializer.validated_data['street'],
-                                street_zipcode=serializer.validated_data['zipcode'],
-                                shipping_municipality=serializer.validated_data['municipality'],
-                                shipping_country=serializer.validated_data['country'],
+                                shipping_street=serializer.validated_data['shipping_street'],
+                                street_zipcode=serializer.validated_data['shipping_zipcode'],
+                                shipping_municipality=serializer.validated_data['shipping_municipality'],
+                                shipping_country=serializer.validated_data['shipping_country'],
                                 cart_hash=cart_digest,
                                 guest_token=request.COOKIES.get('guest_token') if request.COOKIES.get(
                                     'guest_token') and not request.user.is_authenticated else None,
@@ -161,7 +165,9 @@ class CreateOrder(APIView):
                             )
 
                             # TODO: Create and link payment intent for this order
-                            return Response(
+
+
+                            response = Response(
                                 {
                                     "message": "Order created successfully",
                                     'order': order.id,
@@ -170,9 +176,20 @@ class CreateOrder(APIView):
                                 status=status.HTTP_200_OK
                             )
 
+                            response.set_cookie(
+                                'order',
+                                order.id,
+                                max_age=60 * 60 * 24 * 7,
+                                httponly=True,
+                                secure=not settings.DEBUG,
+                                samesite="Lax",
+                                path="/",
+                            )
+
+                            return response
+
 
                 else:
-
                     return Response(
                         {
                             'message': 'Order was already created',
@@ -189,7 +206,7 @@ def clone_products_to_order_items(
     items_to_create = [
         OrderedItem(
             order=order,
-            product=product['product'].barcode,
+            product=product['product'].product,
             amount_ordered=product['quantity'],
             unit_price_at_purchase_time=product['product'].unitPrice,
             currency=currency
@@ -213,7 +230,7 @@ def decrease_stock_for_ordered_items( cart: list[CartItem] ) -> list[str]:
 
     insufficient: list[str] = [
         cart_item['product'].barcode for cart_item in cart
-        if locked[cart_item['product']].stock < cart_item['quantity']
+        if locked[cart_item['product'].barcode].stock < cart_item['quantity']
     ]
 
     if insufficient:

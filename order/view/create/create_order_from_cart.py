@@ -20,7 +20,7 @@ from catalog.models import ProductVariant
 class CreateOrderFromCartSerializer(serializers.Serializer):
     email = serializers.EmailField()
     street = serializers.CharField(source='shipping_street')
-    zipcode = serializers.CharField(source='street_zipcode')
+    zipcode = serializers.CharField(source='shipping_zipcode')
     municipality = serializers.CharField(source='shipping_municipality')
     country = serializers.CharField(source='shipping_country')
     currency = serializers.CharField()
@@ -49,8 +49,11 @@ class CreateOrderFromCart(APIView):
             request._user = AnonymousUser()
 
     def post(self, request):
-        if request.user.is_authenticated and not request.user.has_perm('order.create_order'):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if request.user.is_authenticated and not request.user.has_perm('order.add_order'):
+            return Response(
+                {
+                    'detail': f"User with group ${request.user.groups.all()} does not have permission to create an order from cart."
+                }, status=status.HTTP_403_FORBIDDEN)
         else:
             if request.COOKIES.get('order') is not None:
                 return Response(status=status.HTTP_204_NO_CONTENT)
@@ -63,7 +66,7 @@ class CreateOrderFromCart(APIView):
 
                 email = order_data['email']
                 shipping_street = order_data['shipping_street']
-                street_zipcode = order_data['street_zipcode']
+                street_zipcode = order_data['shipping_zipcode']
                 shipping_municipality = order_data['shipping_municipality']
                 shipping_country = order_data['shipping_country']
 
@@ -73,7 +76,7 @@ class CreateOrderFromCart(APIView):
                             'message': "Your request is incomplete",
                             'email': email,
                             'shipping_street': shipping_street,
-                            'street_zipcode': street_zipcode,
+                            'shipping_zipcode': street_zipcode,
                             'shipping_municipality': shipping_municipality,
                             'shipping_country': shipping_country,
                         },
@@ -105,7 +108,7 @@ class CreateOrderFromCart(APIView):
 
                             if cart_mapping_hash:
                                 cart_mapping = {
-                                    barcode.decode(): quantity
+                                    barcode.decode(): int(quantity)
                                     for barcode,quantity in cart_mapping_hash.items()
                                 }
 
@@ -136,7 +139,7 @@ class CreateOrderFromCart(APIView):
                                 price=sum(item['product'].unitPrice * item['quantity'] for item in cart),
                                 currency=serializer.validated_data['currency'],
                                 shipping_street=serializer.validated_data['shipping_street'],
-                                street_zipcode=serializer.validated_data['street_zipcode'],
+                                street_zipcode=serializer.validated_data['shipping_zipcode'],
                                 shipping_municipality=serializer.validated_data['shipping_municipality'],
                                 shipping_country=serializer.validated_data['shipping_country'],
                                 cart_hash=cart_hash([

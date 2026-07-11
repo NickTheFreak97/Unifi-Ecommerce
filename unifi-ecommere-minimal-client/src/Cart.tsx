@@ -259,8 +259,8 @@ const cartColumns: GridColDef[] = [
             <h1>Test Cart endpoints</h1>
             <section>
             <h2>Catalog</h2>
-            {
-                (catalog.length > 0) &&
+            {   
+                ((catalog?.length ?? 0) > 0) ?
                 catalog.map(
                     category => {
                         let products_for_this_category = category.products.map(
@@ -303,7 +303,7 @@ const cartColumns: GridColDef[] = [
                             </React.Fragment>
                         )
                     }
-                )
+                ) : <h2>Not found</h2>
             }
             </section>
 

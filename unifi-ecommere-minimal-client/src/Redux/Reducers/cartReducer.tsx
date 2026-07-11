@@ -35,6 +35,7 @@ const cartSlice = createSlice({
                 state.error = null
             })
             .addCase(fetchCart.fulfilled, (state, action) => {
+                console.warn(action.payload)
                 state.items = action.payload.cart.map(
                     item => ({
                         barcode: item.barcode,

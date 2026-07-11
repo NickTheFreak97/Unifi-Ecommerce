@@ -37,7 +37,7 @@ class GetCart(APIView):
                     },
                     status=status.HTTP_200_OK)
             else:
-                return Response(status=status.HTTP_407_PROXY_AUTHENTICATION_REQUIRED)
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
             guest_token = request.COOKIES.get('guest_token')
 
@@ -66,4 +66,4 @@ class GetCart(APIView):
                     status=status.HTTP_200_OK
                 )
             else:
-                return Response(status=status.HTTP_402_PAYMENT_REQUIRED)
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
