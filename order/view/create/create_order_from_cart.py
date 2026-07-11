@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from django.conf import settings
 import pycountry
-from order.models import Order
+from order.models import Order, OrderStatus
 from order.view.create.create_order import clone_products_to_order_items, decrease_stock_for_ordered_items, schedule_refill_stock_for_stale_orders, CartItem
 from .create_order import cart_hash
 
@@ -152,6 +152,7 @@ class CreateOrderFromCart(APIView):
                                 ]),
                                 guest_token=request.COOKIES.get('guest_token') if request.COOKIES.get(
                                     'guest_token') and not request.user.is_authenticated else None,
+                                status=OrderStatus.waiting_for_payment
                             )
 
                             clone_products_to_order_items(
@@ -176,6 +177,18 @@ class CreateOrderFromCart(APIView):
                                 order=order,
                                 cart=cart,
                             )
+
+                            guest_token = request.COOKIES.get('guest_token')
+                            if guest_token is not None:
+                                redis = get_redis_connection('default')
+                                user_cart_key = "cart:{user_id}".format(user_id=guest_token)
+                                redis.delete(user_cart_key)
+                            else:
+                                if request.user.is_authenticated:
+                                    Cart.objects.filter(user=request.user).delete()
+                                else:
+                                    return Response(status=status.HTTP_401_UNAUTHORIZED)
+
                             response = Response(
                                 {
                                     "message": "Order created successfully",

@@ -9,7 +9,6 @@ from django.conf import settings
 from rest_framework.response import Response
 import os
 
-
 from .create_order_serializer import CreateOrderSerializer
 from order.utils.CartHash import cart_hash
 from order.models import Order, OrderStatus, OrderedItem
@@ -94,7 +93,7 @@ class CreateOrder(APIView):
                     CreateOrder.make_queue_identity(request, email),
                     cart_hash=cart_digest,
                     created_at__gte=duplication_cutoff,
-                    status__in=[OrderStatus.requires_confirmation, OrderStatus.action_required],
+                    status__in=[OrderStatus.waiting_for_payment, OrderStatus.requires_confirmation, OrderStatus.action_required],
                 ).first()
 
                 if not candidate_duplicate:
@@ -126,6 +125,7 @@ class CreateOrder(APIView):
                                 cart_hash=cart_digest,
                                 guest_token=request.COOKIES.get('guest_token') if request.COOKIES.get(
                                     'guest_token') and not request.user.is_authenticated else None,
+                                status=OrderStatus.waiting_for_payment
                             )
 
                             products_to_clone_query = ProductVariant.objects.filter(

@@ -7,6 +7,7 @@ models.CharField.register_lookup(Length)
 
 class OrderStatus(TextChoices):
     requires_confirmation = "requires_confirmation", "Waiting for confirmation on staff's end"
+    waiting_for_payment = "waiting_for_payment", "Waiting for payment on staff's end"
     paid = "paid", "Order paid"
     processing = "processing", "Order paid and waiting for shipment"
     shipped = "shipped", "Order shipped"

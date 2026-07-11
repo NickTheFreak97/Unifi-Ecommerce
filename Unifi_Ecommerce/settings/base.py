@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_celery_beat",
     "django_celery_results",
+    "Unifi_Ecommerce.apps.UnifiEcommerceConfig",
     "catalog.apps.CatalogConfig",
     "users.apps.UsersConfig",
     "payment.apps.PaymentConfig",

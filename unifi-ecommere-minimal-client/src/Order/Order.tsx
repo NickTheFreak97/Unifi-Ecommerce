@@ -7,27 +7,6 @@ interface StepPageProps {
   onBack?: () => void;
 }
 
-function ProfileForm({ onNext, onBack }: StepPageProps) {
-  return (
-    <Box>
-      <Stack spacing={2} sx={{ mb: 4 }}>
-        <TextField label="First Name" />
-        <TextField label="Last Name" />
-      </Stack>
-
-      <Stack direction="row" spacing={2}>
-        <Button onClick={onBack}>Back</Button>
-        <Button variant="contained" onClick={onNext}>Next</Button>
-      </Stack>
-    </Box>
-  );
-}
-
-
-function ReviewPage({ onBack }: StepPageProps) {
-  return <div>Review <Button onClick={onBack}>Back</Button></div>;
-}
-
 
 const Order: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -46,7 +25,6 @@ const Order: React.FC = () => {
     },
   ];
 
-  const ActiveComponent = steps[activeStep].render;
 
   return (
     <Box>
