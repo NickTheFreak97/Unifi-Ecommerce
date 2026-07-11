@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { http } from "../API/axiosHTTP";
-import { getAccessToken } from "../context/AuthContext";
+import { http } from "../../API/axiosHTTP";
+import { getAccessToken } from "../../context/AuthContext";
 import axios from "axios";
 import { type AddProductPayload } from "./addProductToCart";
 
@@ -17,7 +17,8 @@ export const incrementProductInCart = createAsyncThunk(
                 {
                     headers: {
                         Authorization: !!accessToken ? `Bearer ${accessToken}` : undefined
-                    }
+                    },
+                    withCredentials: true
                 }
             );
 

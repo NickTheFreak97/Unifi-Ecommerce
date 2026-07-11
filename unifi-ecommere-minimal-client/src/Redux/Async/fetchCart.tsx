@@ -1,10 +1,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { http } from "../API/axiosHTTP";
-import { getAccessToken } from "../context/AuthContext";
+import { http } from "../../API/axiosHTTP";
+import { getAccessToken } from "../../context/AuthContext";
 import axios from "axios";
-import type { RootState } from "./store";
+import type { CartItem } from "../Reducers/cartReducer";
 
-export const fetchCart = createAsyncThunk(
+interface FetchCartResult {
+    cart: [CartItem]
+}
+
+export const fetchCart = createAsyncThunk<FetchCartResult, void>(
     'cart/fetch',
     async (_, { rejectWithValue }) => {
         try {

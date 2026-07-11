@@ -1,8 +1,8 @@
 import React from 'react';
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { http } from '../API/axiosHTTP';
-import { getAccessToken } from '../context/AuthContext';
-import { type RootState } from './store';
+import { http } from '../../API/axiosHTTP';
+import { getAccessToken } from '../../context/AuthContext';
+import { type RootState } from '../store';
 
 export interface AddProductPayload {
     barcode: string;

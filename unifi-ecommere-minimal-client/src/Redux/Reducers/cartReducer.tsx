@@ -1,7 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { fetchCart } from '../fetchCart'
-import { addProductToCart } from '../addProductToCart'
-import { incrementProductInCart } from '../incrementProductInCart'
+import { fetchCart } from '../Async/fetchCart'
+import { addProductToCart } from '../Async/addProductToCart'
+import { incrementProductInCart } from '../Async/incrementProductInCart'
+import { decrementProductInCart } from '../Async/decrementProductInCart'
 
 export interface CartItem {
     barcode: string
@@ -119,6 +120,33 @@ const cartSlice = createSlice({
             })
             .addCase(incrementProductInCart.rejected, (state, action) => {
                 state.error = action.payload ?? action.error
+            })
+
+            builder.addCase(decrementProductInCart.pending, (state, action) => {
+                state.error = null
+            })
+            .addCase(decrementProductInCart.fulfilled, (state, action) => {
+                const { barcode, quantity = 1 } = action.payload
+
+                const productIndex = state.items.findIndex(
+                    item => item.barcode === barcode
+                )
+
+                if (productIndex === -1) {
+                    console.error(`Product with barcode ${barcode} not found in cart.`)
+                    return
+                }
+
+                const product = state.items[productIndex]
+
+                if (quantity >= product.quantity) {
+                    state.items.splice(productIndex, 1)
+                } else {
+                    product.quantity -= quantity
+                }
+            })
+            .addCase(decrementProductInCart.rejected, (state, action) => {
+                state.error = action.payload
             })
     }
 })

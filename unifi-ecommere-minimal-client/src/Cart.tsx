@@ -2,14 +2,15 @@ import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { Button } from '@mui/material';
 import { useSelector } from 'react-redux'
-import { fetchCart } from './Redux/fetchCart'
+import { fetchCart } from './Redux/Async/fetchCart'
 import { type RootState } from './Redux/store'
 import { useAppDispatch } from './Redux/hooks'
 import { type Category } from './routes/Catalog'
 import { http } from './API/axiosHTTP'
 import NumberField from './utils/NumberField';
-import { addProductToCart } from './Redux/addProductToCart';
-import { incrementProductInCart } from './Redux/incrementProductInCart';
+import { addProductToCart } from './Redux/Async/addProductToCart';
+import { decrementProductInCart } from './Redux/Async/decrementProductInCart';
+import { incrementProductInCart } from './Redux/Async/incrementProductInCart';
 import { useAuth } from './context/AuthContext';
 
 interface ProductEntry {
@@ -93,6 +94,16 @@ const Cart: React.FC = () => {
     const handleIncrementQuantity = useCallback((product: ProductEntry) => {
         reduxDispatch(
             incrementProductInCart({
+                "barcode": product.barcode,
+                "quantity": 1
+            })
+        )
+    }, [reduxDispatch])
+
+
+    const handleDecrementQuantity = useCallback((product: ProductEntry) => {
+        reduxDispatch(
+            decrementProductInCart({
                 "barcode": product.barcode,
                 "quantity": 1
             })
@@ -196,8 +207,9 @@ const cartColumns: GridColDef[] = [
         renderCell: (params) => (
             <NumberField
                 value={params.row.quantity}
-                min={1}
+                min={-1}
                 onIncrement={() => { handleIncrementQuantity(params.row) }}
+                onDecrement={() => { handleDecrementQuantity(params.row) }}
                 helperText={null}
                 size="small"
             />

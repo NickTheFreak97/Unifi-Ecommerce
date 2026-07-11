@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { http } from "../API/axiosHTTP";
-
 interface User {
     id: number;
     email: string;
