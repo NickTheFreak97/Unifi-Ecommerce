@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { Button } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import { useSelector } from 'react-redux'
 import { fetchCart } from './Redux/Async/fetchCart'
 import { type RootState } from './Redux/store'
@@ -67,6 +68,7 @@ const Cart: React.FC = () => {
     const didLoad = useSelector((state: RootState) => state.cart.didLoad)
     const didFetch = useRef(false)
     const authService = useAuth()
+    const navigate = useNavigate()
 
 
     const handleQuantityChange = useCallback((barcode: string, value: number | null) => {
@@ -118,6 +120,12 @@ const Cart: React.FC = () => {
             removeProductFromCart({ "barcode": product.barcode })
         )
     }, [reduxDispatch])
+
+
+    const redirectToOrder = useCallback((event: React.SubmitEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        navigate('/order')
+    }, [navigate])
 
     const fetchCatalog = useCallback(async () => {
         await http.get('/staff/products/fetch_catalog/')
@@ -316,6 +324,17 @@ const cartColumns: GridColDef[] = [
             ) : (
                 <p>Cart is empty</p>
             )}
+            </section>
+
+            <section>
+                <h2>Proceed to order</h2>
+                <Box component="form" noValidate sx={{
+                    margin: 2
+                }} 
+                onSubmit={redirectToOrder}
+                >
+                    <Button type="submit" variant="contained" color="primary">Checkout</Button>
+                </Box>
             </section>
         </main>
     )

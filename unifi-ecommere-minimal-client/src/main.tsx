@@ -22,6 +22,7 @@ import CreateProduct from "./routes/CreateProduct";
 import Catalog from "./routes/Catalog";
 import Cart from "./Cart";
 import './index.css'
+import Order from "./Order/Order";
 
 const router = createBrowserRouter([
   {
@@ -111,6 +112,11 @@ const router = createBrowserRouter([
       {
         path: '/cart',
         element: <Cart />
+      },
+
+      {
+        path: '/order',
+        element: <Order />
       }
     ],
   },

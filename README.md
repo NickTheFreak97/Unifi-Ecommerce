@@ -81,3 +81,19 @@ To inspect the database content, connect to `localhost:5050` and register a new 
 - Username and Password: specified in `.env.dev` under `POSTGRES_USER` / `POSTGRES_PASSWORD`
 
 
+
+## Testing payments
+
+### Stripe
+Stripe uses the following conventions for testing:
+
+Card number: 
+- 4242 4242 4242 4242 --> Successful payment
+- 4000 0000 0000 0002 --> Generic decline
+- 4000 0000 0000 9995 --> Insufficient funds
+- 4000 0000 0000 9987 --> Lost card
+- 4000 0000 0000 9979 --> Stolen card
+- 4000 0000 0000 0069 --> Expired card
+- 4000 0000 0000 0127 --> CVC error
+
+Combine any of the following with: any 3 digits CVC, future expiry date, any Zip code.
