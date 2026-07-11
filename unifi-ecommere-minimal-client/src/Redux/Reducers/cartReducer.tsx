@@ -1,8 +1,9 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import { fetchCart } from '../Async/fetchCart'
 import { addProductToCart } from '../Async/addProductToCart'
 import { incrementProductInCart } from '../Async/incrementProductInCart'
 import { decrementProductInCart } from '../Async/decrementProductInCart'
+import { removeProductFromCart } from '../Async/removeProductFromCart'
 
 export interface CartItem {
     barcode: string
@@ -25,40 +26,7 @@ const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        decrement: (state, action: PayloadAction<{ barcode: string; quantity?: number }>) => {
-            const { barcode, quantity = 1 } = action.payload
 
-            const productIndex = state.items.findIndex(
-                item => item.barcode === barcode
-            )
-
-            if (productIndex === -1) {
-                console.error(`Product with barcode ${barcode} not found in cart.`)
-                return
-            }
-
-            const product = state.items[productIndex]
-
-            if (quantity >= product.quantity) {
-                state.items.splice(productIndex, 1)
-            } else {
-                product.quantity -= quantity
-            }
-        },
-
-        remove: (state, action: PayloadAction<{ barcode: string }>) => {
-            const index = state.items.findIndex(
-                item => item.barcode === action.payload.barcode
-            )
-
-            if (index !== -1) {
-                state.items.splice(index, 1)
-            } else {
-                console.error(
-                    `Product with barcode ${action.payload.barcode} not found in cart.`
-                )
-            }
-        },
     },
 
     extraReducers: (builder) => {
@@ -81,6 +49,8 @@ const cartSlice = createSlice({
                 state.error = action.payload ?? action.error
             });
 
+
+
         builder
             .addCase(addProductToCart.pending, (state) => {
                 state.error = null
@@ -102,6 +72,8 @@ const cartSlice = createSlice({
                 state.error = action.payload ?? action.error
             })
 
+
+
             builder.addCase(incrementProductInCart.pending, (state) => {
                 state.error = null
             })
@@ -121,6 +93,8 @@ const cartSlice = createSlice({
             .addCase(incrementProductInCart.rejected, (state, action) => {
                 state.error = action.payload ?? action.error
             })
+
+
 
             builder.addCase(decrementProductInCart.pending, (state, action) => {
                 state.error = null
@@ -148,8 +122,29 @@ const cartSlice = createSlice({
             .addCase(decrementProductInCart.rejected, (state, action) => {
                 state.error = action.payload
             })
+
+
+            builder.addCase(removeProductFromCart.pending, (state, action) => {
+                state.error = null
+            })
+            .addCase(removeProductFromCart.fulfilled, (state, action) => {
+                const index = state.items.findIndex(
+                    item => item.barcode === action.payload.barcode
+                )
+
+                if (index !== -1) {
+                    state.items.splice(index, 1)
+                } else {
+                    console.error(
+                        `Product with barcode ${action.payload.barcode} not found in cart.`
+                    )
+                }
+            })
+            .addCase(removeProductFromCart.rejected, (state, action) => {
+                state.error = action.payload
+            })
     }
 })
 
-export const { decrement, remove } = cartSlice.actions
+
 export default cartSlice.reducer

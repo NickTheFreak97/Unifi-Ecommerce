@@ -12,6 +12,7 @@ import { addProductToCart } from './Redux/Async/addProductToCart';
 import { decrementProductInCart } from './Redux/Async/decrementProductInCart';
 import { incrementProductInCart } from './Redux/Async/incrementProductInCart';
 import { useAuth } from './context/AuthContext';
+import { removeProductFromCart } from './Redux/Async/removeProductFromCart';
 
 interface ProductEntry {
     id: string;
@@ -75,6 +76,7 @@ const Cart: React.FC = () => {
         }))
     }, [])
 
+
     const handleAdd = useCallback(async (product: ProductEntry) => {
         const quantity = quantities[product.barcode]
 
@@ -107,6 +109,13 @@ const Cart: React.FC = () => {
                 "barcode": product.barcode,
                 "quantity": 1
             })
+        )
+    }, [reduxDispatch])
+
+
+    const handleRemove = useCallback((product: ProductEntry) => {
+        reduxDispatch(
+            removeProductFromCart({ "barcode": product.barcode })
         )
     }, [reduxDispatch])
 
@@ -227,7 +236,7 @@ const cartColumns: GridColDef[] = [
                 variant="contained"
                 color="error"
                 size="small"
-                onClick={() => {}}
+                onClick={() => { handleRemove(params.row) }}
             >
                 Remove
             </Button>

@@ -7,7 +7,6 @@ from cart.models import Cart
 from django_redis import get_redis_connection
 
 
-
 class RemoveProduct(APIView):
     permission_classes = [AllowAny]
 
@@ -18,26 +17,42 @@ class RemoveProduct(APIView):
             request._user = AnonymousUser()
 
     def delete(self, request, *args, **kwargs):
-        product = request.data.get('barcode')
+        product = request.data.get("barcode")
 
         if product is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        else:
-            if request.user.is_authenticated:
-                 Cart.objects.filter(
-                    user=request.user,
-                    barcode=product
-                ).delete()
 
-                 return Response(status=status.HTTP_200_OK)
-            else:
-                guest_token = request.COOKIES.get('guest_token')
+        if request.user.is_authenticated:
+            deleted, _ = Cart.objects.filter(
+                user=request.user,
+                product__barcode=product,
+            ).delete()
 
-                if guest_token:
-                    redis = get_redis_connection('default')
-                    hash_code = "$cart:{user_id}".format(user_id=guest_token)
+            return Response(
+                status=(
+                    status.HTTP_204_NO_CONTENT
+                    if deleted > 0
+                    else status.HTTP_404_NOT_FOUND
+                )
+            )
 
-                    redis.hdel(hash_code, product)
-                    return Response(status=status.HTTP_200_OK)
-                else:
-                    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        guest_token = request.COOKIES.get("guest_token")
+
+        if guest_token:
+            redis = get_redis_connection("default")
+            hash_code = f"cart:{guest_token}"
+
+            removed = redis.hdel(hash_code, product)
+
+            if redis.hlen(hash_code) <= 0:
+                redis.delete(hash_code)
+
+            return Response(
+                status=(
+                    status.HTTP_204_NO_CONTENT
+                    if removed > 0
+                    else status.HTTP_404_NOT_FOUND
+                )
+            )
+
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
