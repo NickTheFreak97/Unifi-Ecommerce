@@ -1,6 +1,7 @@
 from django.urls import path
+from .views import CreatePaymentMethod
 
 urlpatterns = [
-    # path('endpoint/', MyView.as_view(), name='endpoint_name'),
+    path('create_method/', CreatePaymentMethod.as_view(), name='create_payment_method'),
 ]
 
