@@ -35,13 +35,13 @@ const OrderDetail: React.FC<OrderDetailPageProps> = ({ onSubmit }) => {
         const accessToken = getAccessToken()
 
         await http.post(
-        '/order/create_or_update/',
+        '/orders/create_or_update/',
         {
             'email': order.email,
-            'shipping_street': order.street,
-            'shipping_zipcode': order.zipcode,
-            'shipping_municipality': order.municipality,
-            'shipping_country': order.country,
+            'street': order.street,
+            'zipcode': order.zipcode,
+            'municipality': order.municipality,
+            'country': order.country,
             'currency': order.currency
         },
         {

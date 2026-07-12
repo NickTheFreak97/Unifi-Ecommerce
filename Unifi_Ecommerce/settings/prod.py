@@ -23,4 +23,10 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOWED_ORIGINS = [
+    'https://main.dpgvn15ormsvm.amplifyapp.com'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://main.dpgvn15ormsvm.amplifyapp.com'
+]
