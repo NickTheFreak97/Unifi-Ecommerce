@@ -178,14 +178,15 @@ class CreateOrderFromCart(APIView):
                                 cart=cart,
                             )
 
-                            guest_token = request.COOKIES.get('guest_token')
-                            if guest_token is not None:
-                                redis = get_redis_connection('default')
-                                user_cart_key = "cart:{user_id}".format(user_id=guest_token)
-                                redis.delete(user_cart_key)
+
+                            if request.user.is_authenticated:
+                                Cart.objects.filter(user=request.user).delete()
                             else:
-                                if request.user.is_authenticated:
-                                    Cart.objects.filter(user=request.user).delete()
+                                guest_token = request.COOKIES.get('guest_token')
+                                if guest_token is not None:
+                                    redis = get_redis_connection('default')
+                                    user_cart_key = "cart:{user_id}".format(user_id=guest_token)
+                                    redis.delete(user_cart_key)
                                 else:
                                     return Response(status=status.HTTP_401_UNAUTHORIZED)
 

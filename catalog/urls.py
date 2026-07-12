@@ -1,5 +1,5 @@
 from django.urls import path
-from catalog.views import CreateCategory, CreateProduct, RestockProduct, BulkCreateCategories, BulkCreateProducts, Catalog
+from catalog.views import CreateCategory, CreateProduct, RestockProduct, BulkCreateCategories, BulkCreateProducts, Catalog, SoftDeleteProductView
 from catalog.views.list_categories import ListCategories
 
 urlpatterns = [
@@ -10,5 +10,6 @@ urlpatterns = [
     path('restock/', RestockProduct.as_view(), name='restock_product'),
     path('categories/', ListCategories.as_view(), name='list_categories'),
     path('fetch_catalog/', Catalog.as_view(), name='fetch_catalog'),
+    path('delete/', SoftDeleteProductView.as_view(), name='delete_product'),
 ]
 

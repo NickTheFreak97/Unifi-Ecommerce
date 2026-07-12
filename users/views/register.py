@@ -8,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from users.models.user.user import User
 from users.models.user.roles import Role
 from django.conf import settings
+from order.models import Order
 
 
 def __create_user__(email, username, password):
@@ -41,6 +42,11 @@ def __create_user__(email, username, password):
                     username=username,
                     password=password
                 )
+
+                Order.objects.filter(
+                    email=email,
+                    user__isnull=True,
+                ).update(user=created_user)
 
                 return created_user
 

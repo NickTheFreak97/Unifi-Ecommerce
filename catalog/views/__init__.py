@@ -6,3 +6,4 @@ from .restock_product import RestockProduct
 from .create_category import CreateCategory
 from .list_categories import ListCategories
 from .catalog import Catalog
+from .soft_delete_product import SoftDeleteProductView

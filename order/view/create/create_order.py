@@ -151,6 +151,7 @@ class CreateOrder(APIView):
                             insufficient = decrease_stock_for_ordered_items(cart=hydrated_cart)
 
                             if len(insufficient) > 0:
+                                transaction.set_rollback(True)
                                 return Response(
                                     {
                                         'message': "Insufficient stock for at least one product",
