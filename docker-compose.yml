@@ -1,6 +1,7 @@
 services:
   web:
     build: .
+    image: 043310666116.dkr.ecr.eu-north-1.amazonaws.com/unifi/ecommerce:latest
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
@@ -51,6 +52,7 @@ services:
 
   celery_worker:
     build: .
+    image: 043310666116.dkr.ecr.eu-north-1.amazonaws.com/unifi/ecommerce-celery:latest
     command: celery -A Unifi_Ecommerce worker --loglevel=info
     env_file:
       - .env.dev
@@ -65,6 +67,7 @@ services:
   celery_beat:
     build: .
     command: celery -A Unifi_Ecommerce beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler --schedule /tmp/celerybeat-schedule
+    image: 043310666116.dkr.ecr.eu-north-1.amazonaws.com/unifi/ecommerce/beat:latest
     env_file:
       - .env.dev
     volumes:

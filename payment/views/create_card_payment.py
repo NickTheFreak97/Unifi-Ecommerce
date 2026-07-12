@@ -1,9 +1,21 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, serializers
 from payment.models import CardPayment
 from django.db import IntegrityError
+
+class CreateCardPaymentSerializer(serializers.Serializer):
+    network = serializers.CharField(max_length=50)
+    last_4_digits = serializers.CharField(max_length=4)
+    expiry_date = serializers.DateField( input_formats=["%Y-%m-%d"] )
+    card_owner_name = serializers.CharField(max_length=255)
+
+    def validate_last_4_digits(self, value):
+        if not value.isdigit() or len(value) != 4:
+            raise serializers.ValidationError( "last_4_digits must consist of exactly 4 digits." )
+
+        return value
 
 
 class CreateCardPayment(APIView):

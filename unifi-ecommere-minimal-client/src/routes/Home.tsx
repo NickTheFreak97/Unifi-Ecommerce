@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router'
 
 
+
 const Home: React.FC = () => {
     return (
         <main>
@@ -64,6 +65,7 @@ const Home: React.FC = () => {
                         List all categories
                     </li>
                 </ul>
+                <hr inert/>
 
                 <ul aria-label="Product endpoints">
                     <li>
@@ -102,6 +104,15 @@ const Home: React.FC = () => {
                     </li>
                     <li>
                         Place a new order
+                    </li>
+                </ul>
+
+                <hr inert/>
+                <ul aria-label='payment methods'>
+                    <li>
+                        <Link to="/create-payment-method">
+                            Create a payment method
+                        </Link>
                     </li>
                 </ul>
             </nav>

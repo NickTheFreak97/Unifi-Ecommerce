@@ -23,6 +23,7 @@ import Catalog from "./routes/Catalog";
 import Cart from "./Cart";
 import './index.css'
 import Order from "./Order/Order";
+import CreatePaymentMethod from "./routes/CreatePaymentMethod";
 
 const router = createBrowserRouter([
   {
@@ -117,6 +118,21 @@ const router = createBrowserRouter([
       {
         path: '/order',
         element: <Order />
+      },
+
+      {
+        path: '/order',
+        element: <Order />
+      },
+      {
+        path: '/create-payment-method',
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: '',
+            element: <CreatePaymentMethod />
+          }
+        ]
       }
     ],
   },
