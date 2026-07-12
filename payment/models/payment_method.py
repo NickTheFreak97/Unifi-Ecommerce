@@ -20,4 +20,4 @@ class PaymentMethod(models.Model):
     provider = models.CharField(max_length=15)
 
     class Meta:
-        unique_together = ('type', 'name','provider')
+        unique_together = ('type', 'name', 'provider')

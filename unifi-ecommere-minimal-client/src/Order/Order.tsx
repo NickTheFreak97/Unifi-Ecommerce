@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Stepper, Step, StepLabel, Button, Box, Stack, TextField } from '@mui/material'
 import OrderDetail from './OrderDetail';
+import PaymentDetails from './PaymentDetails';
 
 interface StepPageProps {
   onNext?: () => void;
@@ -21,7 +22,7 @@ const Order: React.FC = () => {
     },
     {
       label: 'Payment',
-      render: () => { return <div>Lorem ipsum</div>},
+      render: () => { return <PaymentDetails />},
     },
   ];
 

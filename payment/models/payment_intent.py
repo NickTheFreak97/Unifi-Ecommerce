@@ -48,7 +48,7 @@ class PaymentIntent(models.Model):
     amount = models.DecimalField(max_digits=6, decimal_places=2)
     currency = models.CharField(max_length=3)
     time_of_creation = models.DateTimeField(auto_now_add=True)
-    time_of_last_update = models.DateTimeField(auto_now_add=True)
+    time_of_last_update = models.DateTimeField(auto_now=True)
     idempotency_key = models.CharField(max_length=36, null=True, blank=True, unique=True)
 
 
