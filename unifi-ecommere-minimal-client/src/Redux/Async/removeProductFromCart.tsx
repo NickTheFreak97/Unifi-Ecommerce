@@ -1,4 +1,3 @@
-import React from 'react';
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { http } from '../../API/axiosHTTP';
 import { getAccessToken } from '../../context/AuthContext';

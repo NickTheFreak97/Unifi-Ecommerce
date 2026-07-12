@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { http } from './axiosHTTP'
 
 export interface OrderDetailProps {
@@ -10,13 +10,12 @@ export interface OrderDetailProps {
     currency: string
 }
 
-
-const createOrUpdateOrder = async (
+export const createOrUpdateOrder = async (
     order: OrderDetailProps,
     accessToken: string | null | undefined
 ) : Promise<boolean> => {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(() => {
         return http.post(
             '/order/create_or_update/',
             {
@@ -34,7 +33,7 @@ const createOrUpdateOrder = async (
                 withCredentials: true
             }
         )
-        .then(response => {
+        .then(() => {
             return true
         })
         .catch(error => {

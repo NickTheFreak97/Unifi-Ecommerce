@@ -1,19 +1,14 @@
 import React, { useState } from 'react'
-import { Stepper, Step, StepLabel, Button, Box, Stack, TextField } from '@mui/material'
+import { Stepper, Step, StepLabel, Box } from '@mui/material'
 import OrderDetail from './OrderDetail';
 import PaymentDetails from './PaymentDetails';
 
-interface StepPageProps {
-  onNext?: () => void;
-  onBack?: () => void;
-}
 
 
 const Order: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
 
   const handleNext = () => setActiveStep((s) => s + 1);
-  const handleBack = () => setActiveStep((s) => s - 1);
 
   const steps: { label: string; render: () => React.ReactNode }[] = [
     {

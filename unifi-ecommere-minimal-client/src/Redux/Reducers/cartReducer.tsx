@@ -97,7 +97,7 @@ const cartSlice = createSlice({
 
 
 
-            builder.addCase(decrementProductInCart.pending, (state, action) => {
+            builder.addCase(decrementProductInCart.pending, (state) => {
                 state.error = null
             })
             .addCase(decrementProductInCart.fulfilled, (state, action) => {
@@ -125,7 +125,7 @@ const cartSlice = createSlice({
             })
 
 
-            builder.addCase(removeProductFromCart.pending, (state, action) => {
+            builder.addCase(removeProductFromCart.pending, (state) => {
                 state.error = null
             })
             .addCase(removeProductFromCart.fulfilled, (state, action) => {

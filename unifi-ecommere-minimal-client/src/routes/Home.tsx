@@ -21,9 +21,6 @@ const Home: React.FC = () => {
                             Create store manager
                         </Link>
                     </li>
-                    <li>
-                        Create webmaster
-                    </li>
                 </ul>
                 <hr inert/>
 
@@ -32,9 +29,6 @@ const Home: React.FC = () => {
                         <Link to="/login">
                             Login
                         </Link>
-                    </li>
-                    <li>
-                        Refresh JWT token
                     </li>
                 </ul>
 
@@ -46,12 +40,6 @@ const Home: React.FC = () => {
                             List all users by role
                         </Link>
                     </li>
-                    <li>
-                        Update user info
-                    </li>
-                    <li>
-                        List all roles
-                    </li>
                 </ul>
 
                 <hr inert/>
@@ -61,9 +49,6 @@ const Home: React.FC = () => {
                             Create a new category
                         </Link>
                     </li>
-                    <li>
-                        List all categories
-                    </li>
                 </ul>
                 <hr inert/>
 
@@ -72,21 +57,6 @@ const Home: React.FC = () => {
                         <Link to="/create-product">
                             Create a new product
                         </Link>
-                    </li>
-                    <li>
-                        Restock an existing product
-                    </li>
-                    <li>
-                        List all products
-                    </li>
-                    <li>
-                        List all products for a category
-                    </li>
-                    <li>
-                        Update product info
-                    </li>
-                    <li>
-                        Soft delete a product
                     </li>
                 </ul>
 
@@ -99,11 +69,8 @@ const Home: React.FC = () => {
                     </li>
                     <li>
                         <Link to="/cart">
-                            CRUD cart
+                            Manage cart | Create & Update order | Pay
                         </Link>
-                    </li>
-                    <li>
-                        Place a new order
                     </li>
                 </ul>
 

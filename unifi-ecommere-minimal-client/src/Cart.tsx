@@ -25,10 +25,6 @@ interface ProductEntry {
     inCart: boolean;
 }
 
-interface CartProps {
-    didLoad: boolean;
-    error: any
-}
 
 const staticColumns: GridColDef<ProductEntry>[] = [
     {

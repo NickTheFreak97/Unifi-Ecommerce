@@ -184,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             },
             withCredentials: true
         })
-        .then(successResponse => {
+        .then(() => {
             setAccessToken(null);
             setUser(null);
 
