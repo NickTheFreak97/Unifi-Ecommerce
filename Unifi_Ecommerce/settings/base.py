@@ -75,8 +75,10 @@ INSTALLED_APPS = [
     'corsheaders',
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
-    "order.apps.OrderConfig"
+    "order.apps.OrderConfig",
+    'drf_spectacular'
 ]
+
 
 DATABASES = {
     "default": {
@@ -96,9 +98,15 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Unifi Ecommerce API',
+    'VERSION': '1.0.0',
+}
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),

@@ -24,9 +24,11 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 CORS_ALLOWED_ORIGINS = [
-    'https://main.dpgvn15ormsvm.amplifyapp.com'
+    'https://main.dpgvn15ormsvm.amplifyapp.com',
+    'https://d1079g0dt2da6g.cloudfront.net',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://main.dpgvn15ormsvm.amplifyapp.com'
+    'https://main.dpgvn15ormsvm.amplifyapp.com',
+    'https://d1079g0dt2da6g.cloudfront.net',
 ]
